@@ -138,11 +138,16 @@ jobs:
               env:
                   GH_TOKEN: ${{ github.token }}
               run: |
-                  gh release create "v$VERSION" "$RUNNER_TEMP/Cleaner-$VERSION-macos.dmg" \
-                      --title "Cleaner $VERSION" --target "$GITHUB_SHA" \
-                      --notes "Install with one line: \`curl -fsSL https://blob.ciromaciel.click/tools/cleaner/install.sh | bash\`. Downloaded the .dmg instead? Not notarized yet: run \`xattr -dr com.apple.quarantine /Applications/Cleaner.app\` once after copying it. Apple Silicon, macOS 14+.
+                  cat >"$RUNNER_TEMP/notes.md" <<NOTES
+                  Install with one line: \`curl -fsSL https://blob.ciromaciel.click/tools/cleaner/install.sh | bash\`.
 
-Made by [Ciro Cesar Maciel](https://ciromaciel.click/?ref=oss-cleaner-release). [Follow @ciro-maciel](https://github.com/ciro-maciel) for the next open-source tools."
+                  Downloaded the .dmg instead? Not notarized yet: run \`xattr -dr com.apple.quarantine /Applications/Cleaner.app\` once after copying it. Apple Silicon, macOS 14+.
+
+                  Made by [Ciro Cesar Maciel](https://ciromaciel.click/?ref=oss-cleaner-release). [Follow @ciro-maciel](https://github.com/ciro-maciel) for the next open-source tools.
+                  NOTES
+                  sed -i '' 's/^ *//' "$RUNNER_TEMP/notes.md"
+                  gh release create "v$VERSION" "$RUNNER_TEMP/Cleaner-$VERSION-macos.dmg" \
+                      --title "Cleaner $VERSION" --target "$GITHUB_SHA" --notes-file "$RUNNER_TEMP/notes.md"
 
             - name: Install with the public line
               run: |
