@@ -1,4 +1,4 @@
-# Cleaner
+# Cleaner by Ciro Cesar Maciel
 
 **A Mac cleaner that shows you everything before it deletes anything.**
 

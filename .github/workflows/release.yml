@@ -147,7 +147,7 @@ jobs:
                   NOTES
                   sed -i '' 's/^ *//' "$RUNNER_TEMP/notes.md"
                   gh release create "v$VERSION" "$RUNNER_TEMP/Cleaner-$VERSION-macos.dmg" \
-                      --title "Cleaner $VERSION" --target "$GITHUB_SHA" --notes-file "$RUNNER_TEMP/notes.md"
+                      --title "Cleaner by Ciro Cesar Maciel $VERSION" --target "$GITHUB_SHA" --notes-file "$RUNNER_TEMP/notes.md"
 
             - name: Install with the public line
               run: |

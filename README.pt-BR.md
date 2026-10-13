@@ -1,4 +1,4 @@
-# Cleaner
+# Cleaner by Ciro Cesar Maciel
 
 **O limpador de Mac que mostra tudo antes de apagar qualquer coisa.**
 
