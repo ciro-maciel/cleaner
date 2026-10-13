@@ -1,3 +1,5 @@
 .build/
 dist/
 .DS_Store
+# Licensed illustrations: only the official build has them (ciro-maciel/cleaner-assets).
+Resources/Illustrations/
