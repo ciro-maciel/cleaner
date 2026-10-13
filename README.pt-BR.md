@@ -75,6 +75,8 @@ scripts/build.sh                 # dist/Cleaner.app
 open dist/Cleaner.app
 ```
 
+As ilustrações de cada tela vêm de uma galeria licenciada e só vão no build oficial; compilando a partir deste repositório, cada tela mostra o ícone Tabler no lugar. Para usar as suas, ponha PNGs de 560 × 560 em `Resources/Illustrations`.
+
 O `scripts/signing-identity.sh` cria, uma vez, um certificado local de assinatura. Com ele, o Acesso Total ao Disco continua valendo depois de cada build; sem ele, o build sai com assinatura ad hoc e o macOS pede a permissão de novo toda vez.
 
 Os testes rodam no seu Mac sem mudar nada:

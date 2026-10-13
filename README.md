@@ -80,6 +80,8 @@ scripts/build.sh                 # dist/Cleaner.app
 open dist/Cleaner.app
 ```
 
+The illustrations on each screen come from a licensed gallery and ship only in the official build; a build from this repository draws the Tabler icon of each screen instead. To use your own, drop 560 × 560 PNGs into `Resources/Illustrations`.
+
 `scripts/signing-identity.sh` creates a local signing certificate once. With it, Full Disk Access survives each rebuild; without it, the build is signed ad hoc and macOS asks again every time.
 
 Tests run against your own Mac without changing it:
