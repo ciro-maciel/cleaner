@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "about": "Cleanup rules for Cleaner. Allowlist only: a path enters a scan only when a rule here names it. Everything removed goes to the quarantine for 7 days first.",
+  "rules": [
+    {
+      "id": "app-caches",
+      "title": "Caches de aplicativos",
+      "why": "Arquivos temporários que cada app recria sozinho quando precisa.",
+      "risk": "low",
+      "mode": "children",
+      "paths": ["~/Library/Caches"],
+      "exclude": ["com.apple.*", "CloudKit", "FamilyCircle", "GeoServices", "click.ciromaciel.cleaner", ".*"],
+      "skipRunningApps": true,
+      "defaultOn": true
+    },
+    {
+      "id": "logs",
+      "title": "Registros de aplicativos",
+      "why": "Diários que os apps escrevem para diagnóstico. Ninguém lê depois que o problema passou.",
+      "risk": "low",
+      "mode": "children",
+      "paths": ["~/Library/Logs"],
+      "exclude": [".*"],
+      "defaultOn": true
+    },
+    {
+      "id": "trash",
+      "title": "Lixeira",
+      "why": "O que você já mandou para a Lixeira e ainda ocupa espaço.",
+      "risk": "low",
+      "mode": "children",
+      "paths": ["~/.Trash"],
+      "exclude": [".DS_Store"],
+      "defaultOn": true
+    },
+    {
+      "id": "installers",
+      "title": "Instaladores em Downloads",
+      "why": "Imagens de disco e pacotes de instalação com mais de 7 dias. O app já está instalado; o instalador sobra.",
+      "risk": "low",
+      "mode": "files",
+      "paths": ["~/Downloads"],
+      "extensions": ["dmg", "pkg", "mpkg", "xip", "iso"],
+      "minAgeDays": 7,
+      "defaultOn": true
+    },
+    {
+      "id": "xcode-derived-data",
+      "title": "Compilações do Xcode",
+      "why": "A pasta DerivedData guarda compilações intermediárias. O Xcode refaz tudo na próxima compilação.",
+      "risk": "low",
+      "mode": "children",
+      "paths": ["~/Library/Developer/Xcode/DerivedData"],
+      "exclude": [".*"],
+      "defaultOn": true
+    },
+    {
+      "id": "dev-caches",
+      "title": "Caches de ferramentas de desenvolvimento",
+      "why": "Pacotes baixados por npm, Bun, pnpm, Gradle e Cargo. Eles baixam de novo quando precisarem.",
+      "risk": "low",
+      "mode": "self",
+      "paths": ["~/.npm/_cacache", "~/.bun/install/cache", "~/Library/pnpm/store", "~/.gradle/caches", "~/.cargo/registry/cache"],
+      "defaultOn": true
+    },
+    {
+      "id": "xcode-device-support",
+      "title": "Suporte a aparelhos do Xcode",
+      "why": "Símbolos de cada versão de iOS que já foi plugada. Volta sozinho ao plugar o aparelho, mas demora.",
+      "risk": "medium",
+      "mode": "children",
+      "paths": ["~/Library/Developer/Xcode/iOS DeviceSupport", "~/Library/Developer/Xcode/watchOS DeviceSupport"],
+      "exclude": [".*"],
+      "defaultOn": false
+    },
+    {
+      "id": "mail-downloads",
+      "title": "Anexos abertos no Mail",
+      "why": "Cópias dos anexos que você abriu. O original continua no e-mail.",
+      "risk": "low",
+      "mode": "children",
+      "paths": ["~/Library/Containers/com.apple.mail/Data/Library/Mail Downloads"],
+      "exclude": [".*"],
+      "defaultOn": true
+    }
+  ]
+}

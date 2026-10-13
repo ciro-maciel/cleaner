@@ -1,0 +1,14 @@
+Cleaner
+Copyright (c) 2026 Ciro Cesar Maciel. Licensed under the MIT License (LICENSE).
+
+This repository includes third-party material under its own license:
+
+- Montserrat (Resources/Fonts), by the Montserrat Project Authors.
+  SIL Open Font License 1.1: Resources/Fonts/OFL.txt.
+  https://github.com/JulietaUla/Montserrat
+
+- Tabler Icons (Resources/Icons), by Paweł Kuna.
+  MIT License. https://github.com/tabler/tabler-icons
+
+- The app icon (Resources/AppIcon.icns) is the letter C set in Candal, by Vernon Adams.
+  SIL Open Font License 1.1. https://fonts.google.com/specimen/Candal

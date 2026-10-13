@@ -1,0 +1,152 @@
+name: Cleaner — release
+
+# Builds the .dmg, publishes it to blob.ciromaciel.click/tools/cleaner/ and to GitHub
+# Releases, then installs it with the public line, as a user would. The page at
+# ciromaciel.click/tools/cleaner and the README point to the fixed latest/ link, so a
+# release updates the download button without a site deploy.
+#
+# WHEN IT PUBLISHES: when VERSION is greater than the published one. Bumping VERSION and
+# pushing to main is the release. A push without a new version only runs "plan".
+#
+# SIGNING: the app's own certificate ("Cleaner Local Signing", secret MACOS_CERTIFICATE),
+# imported into a throwaway keychain. That fixed identity is what keeps Full Disk Access
+# granted from one version to the next. There is no Apple Developer account yet, so nothing
+# is notarized: the README shows the Terminal line that installs without the block.
+# When the account exists: sign with the Developer ID certificate, add `--options runtime`
+# to the app in scripts/build.sh, then `xcrun notarytool submit --wait` and
+# `xcrun stapler staple` on the .dmg, between "Check the signature" and "Publish".
+#
+# The secrets live in the "release" environment, which only main can use. Pull requests
+# never see them (ci.yml builds those).
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - 'VERSION'
+            - 'Sources/**'
+            - 'Resources/**'
+            - 'rules.json'
+            - 'scripts/**'
+            - '.github/workflows/release.yml'
+    workflow_dispatch:
+
+concurrency:
+    group: release
+    cancel-in-progress: false
+
+permissions:
+    contents: read
+
+jobs:
+    plan:
+        runs-on: ubuntu-latest
+        timeout-minutes: 3
+        outputs:
+            version: ${{ steps.plan.outputs.version }}
+            go: ${{ steps.plan.outputs.go }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  sparse-checkout: VERSION
+                  sparse-checkout-cone-mode: false
+            - name: Compare with blob.ciromaciel.click
+              id: plan
+              run: |
+                  VERSION="$(cat VERSION)"
+                  PUBLISHED="$(curl -sf https://blob.ciromaciel.click/tools/cleaner/latest.json | sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' || true)"
+                  GO=false
+                  if [ -z "$PUBLISHED" ]; then GO=true
+                  elif [ "$VERSION" != "$PUBLISHED" ] && [ "$(printf '%s\n%s\n' "$PUBLISHED" "$VERSION" | sort -V | tail -1)" = "$VERSION" ]; then GO=true
+                  fi
+                  echo "cleaner: $VERSION here, ${PUBLISHED:-none} published → $([ $GO = true ] && echo build || echo skip)"
+                  echo "version=$VERSION" >>"$GITHUB_OUTPUT"
+                  echo "go=$GO" >>"$GITHUB_OUTPUT"
+
+    release:
+        needs: plan
+        if: needs.plan.outputs.go == 'true'
+        name: Cleaner ${{ needs.plan.outputs.version }}
+        runs-on: macos-15
+        timeout-minutes: 30
+        environment: release
+        permissions:
+            contents: write
+        env:
+            VERSION: ${{ needs.plan.outputs.version }}
+        steps:
+            - uses: actions/checkout@v4
+
+            # codesign refuses an untrusted identity, so the self-signed certificate is
+            # trusted on this runner only.
+            - name: Signing identity
+              env:
+                  CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+                  PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+              run: |
+                  KC="$RUNNER_TEMP/signing.keychain-db"
+                  KP="$(openssl rand -hex 16)"
+                  echo "$CERTIFICATE" | base64 --decode >"$RUNNER_TEMP/signing.p12"
+                  security create-keychain -p "$KP" "$KC"
+                  security set-keychain-settings -lut 21600 "$KC"
+                  security unlock-keychain -p "$KP" "$KC"
+                  security import "$RUNNER_TEMP/signing.p12" -k "$KC" -P "$PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+                  security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KP" "$KC" >/dev/null
+                  KEYCHAINS=("$KC")
+                  while IFS= read -r line; do KEYCHAINS+=("$(echo "$line" | xargs)"); done < <(security list-keychains -d user)
+                  security list-keychains -d user -s "${KEYCHAINS[@]}"
+                  security find-certificate -a -p "$KC" >"$RUNNER_TEMP/signing.pem"
+                  sudo security add-trusted-cert -d -r trustRoot -p codeSign -k /Library/Keychains/System.keychain "$RUNNER_TEMP/signing.pem"
+                  security find-identity -p codesigning "$KC"
+                  rm -f "$RUNNER_TEMP/signing.p12"
+
+            # The app is built on macOS 26 SDKs; the runner's default Xcode is older.
+            - name: Newest Xcode
+              run: |
+                  XCODE="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+                  sudo xcode-select -s "$XCODE"
+                  xcrun --show-sdk-version
+
+            - name: Build
+              run: |
+                  bash scripts/build.sh
+                  bash scripts/release/dmg-mac.sh dist/Cleaner.app "$RUNNER_TEMP/Cleaner-$VERSION-macos.dmg" "Cleaner $VERSION"
+
+            - name: Self-test
+              run: CLEANER_NO_ADMIN=1 dist/Cleaner.app/Contents/MacOS/Cleaner --selftest
+
+            # macOS pins permissions to the certificate, not to a per-build hash: an ad hoc
+            # signature would cost every user their Full Disk Access.
+            - name: Check the signature
+              run: |
+                  MOUNT="$(mktemp -d)"
+                  hdiutil attach -nobrowse -readonly -mountpoint "$MOUNT" "$RUNNER_TEMP/Cleaner-$VERSION-macos.dmg" >/dev/null
+                  codesign --verify --strict "$MOUNT/Cleaner.app"
+                  codesign -d -r- "$MOUNT/Cleaner.app" 2>&1 | tee "$RUNNER_TEMP/requirement.txt"
+                  hdiutil detach "$MOUNT" >/dev/null
+                  grep -qE 'certificate (leaf|root) = H"' "$RUNNER_TEMP/requirement.txt" ||
+                      { echo "signed ad hoc, not with the app's certificate"; exit 1; }
+
+            - name: Publish to blob.ciromaciel.click
+              run: bash scripts/release/publish-mac.sh cleaner Cleaner "$RUNNER_TEMP/Cleaner-$VERSION-macos.dmg" "$VERSION" 14
+              env:
+                  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+                  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+            - name: Publish to GitHub Releases
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh release create "v$VERSION" "$RUNNER_TEMP/Cleaner-$VERSION-macos.dmg" \
+                      --title "Cleaner $VERSION" --target "$GITHUB_SHA" \
+                      --notes "Install with one line: \`curl -fsSL https://blob.ciromaciel.click/tools/cleaner/install.sh | bash\`. Downloaded the .dmg instead? Not notarized yet: run \`xattr -dr com.apple.quarantine /Applications/Cleaner.app\` once after copying it. Apple Silicon, macOS 14+."
+
+            - name: Install with the public line
+              run: |
+                  curl -fsSL "https://blob.ciromaciel.click/tools/cleaner/install.sh?v=$VERSION" | bash
+                  sleep 8
+                  [ "$(defaults read /Applications/Cleaner.app/Contents/Info CFBundleShortVersionString)" = "$VERSION" ] ||
+                      { echo "installed a different version"; exit 1; }
+                  pgrep -f "/Applications/Cleaner.app/Contents/MacOS/" >/dev/null || { echo "the app did not stay open"; exit 1; }
+                  echo "✓ Cleaner $VERSION installed and running"
