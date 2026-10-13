@@ -43,7 +43,7 @@ Os limpadores conhecidos pedem que você confie num número de "lixo". O Cleaner
 | --- | --- |
 | Visão geral | Uma varredura para tudo: espaço que dá para liberar, disco, apps, inicialização, quarentena |
 | Limpeza | Aplica as regras do `rules.json`: caches, registros, Lixeira, instaladores, Xcode, caches de desenvolvimento, anexos do Mail |
-| Desinstalador | Lista os apps com tamanho e último uso; remove o app e os restos dele em 39 lugares da Biblioteca |
+| Desinstalador | Lista os apps com tamanho e último uso; remove o app e os restos dele em 38 lugares, recibos de .pkg incluídos |
 | Mapa do disco | Mede uma pasta inteira em paralelo e deixa entrar nas maiores |
 | Inicialização | Liga e desliga LaunchAgents e LaunchDaemons sem apagar o arquivo |
 | Quarentena | Lotes com o caminho de origem; devolve com um clique; apaga sozinho depois de 7 dias |
@@ -62,7 +62,7 @@ Em `Sources/Cleaner/Engine/Uninstaller.swift`, nesta ordem:
 5. tira o ícone do Dock;
 6. confere o que ficou.
 
-Os restos são procurados em 39 lugares (`AppCatalog.places()`), pelo identificador do app ou pelo nome exato, inclusive pastas do fabricante e recibos de `.pkg`. Devolver da quarentena refaz o registro e o ícone no Dock.
+Os restos são procurados em 38 lugares (`AppCatalog.places()`), pelo identificador do app ou pelo nome exato, inclusive pastas do fabricante e os recibos de `.pkg`. Devolver da quarentena refaz o registro e o ícone no Dock.
 
 ## Compilar
 

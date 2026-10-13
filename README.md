@@ -41,7 +41,7 @@ The well-known cleaners ask you to trust a "junk" number. Cleaner shows you how 
 | --- | --- |
 | Overview | One scan for everything: space you can free, disk, apps, startup items, quarantine |
 | Cleanup | Applies the rules in `rules.json`: app caches, logs, Trash, old installers, Xcode, developer caches, Mail downloads |
-| Uninstaller | Lists apps with size and last use, then removes the app and its leftovers in 39 places in the Library |
+| Uninstaller | Lists apps with size and last use, then removes the app and its leftovers in 38 places, .pkg receipts included |
 | Disk map | Measures a whole folder in parallel and lets you walk into the biggest parts |
 | Startup | Turns LaunchAgents and LaunchDaemons on and off without deleting the file |
 | Quarantine | Batches with their original paths: restore with a click, emptied after 7 days |
