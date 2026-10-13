@@ -6,7 +6,7 @@ Every rule it cleans by is in one readable file, [`rules.json`](rules.json). Not
 
 [Português](README.pt-BR.md)
 
-![Cleaner overview: 2.7 GB that can be freed, disk usage and the four tools](docs/overview.webp)
+![Cleaner overview: 2.1 GB that can be freed, disk usage and the four tools](docs/overview.webp)
 
 ## Install
 

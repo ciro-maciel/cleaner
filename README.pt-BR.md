@@ -6,7 +6,7 @@ Toda regra que ele usa para limpar está num arquivo que dá para ler, o [`rules
 
 [English](README.md)
 
-![Visão geral do Cleaner: 2,7 GB para liberar, uso do disco e as quatro ferramentas](docs/overview.webp)
+![Visão geral do Cleaner: 2,1 GB para liberar, uso do disco e as quatro ferramentas](docs/overview.webp)
 
 ## Instalar
 
