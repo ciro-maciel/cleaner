@@ -234,10 +234,7 @@ struct Sidebar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Room for the window buttons, then the wordmark (28px) and who made it.
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Cleaner").zenDisplay(28)
-                MakerLink(source: "oss-cleaner-app")
-            }
+            Logotype(height: 54, source: "oss-cleaner-app")
                 .padding(.top, 52)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
