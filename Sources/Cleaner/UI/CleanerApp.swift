@@ -258,8 +258,19 @@ struct Sidebar: View {
                 }
                 .buttonStyle(.plain)
                 .help(model.hasFullDiskAccess ? "Ver as permissões" : "Abrir a lista do Acesso Total ao Disco nos Ajustes do Sistema")
-                Text("Versão \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev") · por Ciro Cesar Maciel")
-                    .zenData(12, color: Zen.gray5)
+                // The maker's name opens his site in the browser: a link, not network code
+                // (the app itself never talks to the internet).
+                HStack(spacing: 0) {
+                    Text("Versão \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev") · ")
+                        .zenData(12, color: Zen.gray5)
+                    Button {
+                        if let url = URL(string: "https://ciromaciel.click/?ref=oss-cleaner-app") { NSWorkspace.shared.open(url) }
+                    } label: {
+                        Text("por Ciro Cesar Maciel").zenData(12, color: Zen.gray7).underline()
+                    }
+                    .buttonStyle(.plain)
+                    .help("Mais ferramentas do Ciro, em ciromaciel.click")
+                }
             }
             .padding(24)
             .frame(maxWidth: .infinity, alignment: .leading)

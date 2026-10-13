@@ -109,3 +109,5 @@ Issues and pull requests are welcome, especially for `rules.json`. See [CONTRIBU
 ---
 
 Made by [Ciro Cesar Maciel](https://ciromaciel.click/?ref=oss-cleaner). I build tools and show how to use them: more [free tools](https://ciromaciel.click/tools?ref=oss-cleaner) and [Mac apps](https://ciromaciel.click/tools/cleaner?ref=oss-cleaner).
+
+**Want the next one?** [Follow @ciro-maciel](https://github.com/ciro-maciel) for the next open-source tools, and click **Watch → Custom → Releases** above to hear about every new Cleaner rule.

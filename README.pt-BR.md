@@ -112,3 +112,5 @@ Issues e pull requests são bem-vindos, principalmente no `rules.json`. Veja o [
 ---
 
 Feito por [Ciro Cesar Maciel](https://ciromaciel.click/?ref=oss-cleaner). Eu faço ferramentas e mostro como usar: mais [ferramentas grátis](https://ciromaciel.click/tools?ref=oss-cleaner) e [apps de Mac](https://ciromaciel.click/tools/cleaner?ref=oss-cleaner).
+
+**Quer a próxima?** [Siga @ciro-maciel](https://github.com/ciro-maciel) para as próximas ferramentas abertas, e clique em **Watch → Custom → Releases** aqui em cima para saber de cada regra nova do Cleaner.

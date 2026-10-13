@@ -26,7 +26,7 @@ Both tests must pass, and CI runs them on every pull request. If your change tou
 House rules:
 
 - Swift and SwiftUI only, built by `swiftc`. No Xcode project, no package manager, no dependencies.
-- No network code. Cleaner never talks to the internet, and that is a promise in the README.
+- No network code. Cleaner never talks to the internet, and that is a promise in the README. A link the person clicks opens in their browser; that is the only way out.
 - Anything that removes goes through the quarantine. Nothing is deleted in place.
 - Every removal asks for the 3-second hold.
 

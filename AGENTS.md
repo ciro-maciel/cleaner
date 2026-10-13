@@ -24,7 +24,7 @@ dist/Cleaner.app/Contents/MacOS/Cleaner --uninstall-test
 
 ## Rules that must hold
 
-- No network code, anywhere.
+- No network code, anywhere: no `URLSession`, no sockets. Opening a link in the browser (`NSWorkspace.shared.open`) is allowed; the browser makes the request, not Cleaner.
 - Every removal goes to the quarantine, and every removal button is a 3-second hold.
 - `EACCES` asks for the password once per action; `EPERM` never asks, because a password can't fix it.
 - The bundle identifiers (`click.ciromaciel.cleaner`, `click.ciromaciel.cleaner.helper`) never change: macOS ties Full Disk Access to them.
