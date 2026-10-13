@@ -233,8 +233,11 @@ struct Sidebar: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Room for the window buttons, then the wordmark (28px).
-            Text("Cleaner").zenDisplay(28)
+            // Room for the window buttons, then the wordmark (28px) and who made it.
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Cleaner").zenDisplay(28)
+                MakerLink(source: "oss-cleaner-app")
+            }
                 .padding(.top, 52)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
@@ -258,19 +261,8 @@ struct Sidebar: View {
                 }
                 .buttonStyle(.plain)
                 .help(model.hasFullDiskAccess ? "Ver as permissões" : "Abrir a lista do Acesso Total ao Disco nos Ajustes do Sistema")
-                // The maker's name opens his site in the browser: a link, not network code
-                // (the app itself never talks to the internet).
-                HStack(spacing: 0) {
-                    Text("Versão \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev") · ")
-                        .zenData(12, color: Zen.gray5)
-                    Button {
-                        if let url = URL(string: "https://ciromaciel.click/?ref=oss-cleaner-app") { NSWorkspace.shared.open(url) }
-                    } label: {
-                        Text("por Ciro Cesar Maciel").zenData(12, color: Zen.gray7).underline()
-                    }
-                    .buttonStyle(.plain)
-                    .help("Mais ferramentas do Ciro, em ciromaciel.click")
-                }
+                Text("Versão \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev")")
+                    .zenData(12, color: Zen.gray5)
             }
             .padding(24)
             .frame(maxWidth: .infinity, alignment: .leading)

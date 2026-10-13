@@ -297,3 +297,20 @@ struct CheckBox: View {
              size: 18, color: state == .off ? Zen.gray4 : Zen.gray9)
     }
 }
+
+/// "by Ciro Cesar Maciel" under the wordmark. It opens his site in the browser: a link the person
+/// clicks, not network code (the app itself never talks to the internet). `source` tells his
+/// scoreboard which corner of the app the visit came from.
+struct MakerLink: View {
+    let source: String
+
+    var body: some View {
+        Button {
+            if let url = URL(string: "https://ciromaciel.click/?ref=\(source)") { NSWorkspace.shared.open(url) }
+        } label: {
+            Text("by Ciro Cesar Maciel").zenData(12, color: Zen.gray6).underline()
+        }
+        .buttonStyle(.plain)
+        .help("Mais ferramentas do Ciro, em ciromaciel.click")
+    }
+}

@@ -15,7 +15,7 @@ cp -R "$ROOT/dist/Cleaner.app" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 DMG="$ROOT/dist/Cleaner-$VERSION.dmg"
 rm -f "$DMG"
-hdiutil create -volname "Cleaner $VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
+hdiutil create -volname "Cleaner by Ciro Cesar Maciel $VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
 rm -rf "$STAGE"
 
 # Install from the packed image, the same bytes a tester gets.

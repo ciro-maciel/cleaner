@@ -110,7 +110,7 @@ jobs:
             - name: Build
               run: |
                   bash scripts/build.sh
-                  bash scripts/release/dmg-mac.sh dist/Cleaner.app "$RUNNER_TEMP/Cleaner-$VERSION-macos.dmg" "Cleaner $VERSION"
+                  bash scripts/release/dmg-mac.sh dist/Cleaner.app "$RUNNER_TEMP/Cleaner-$VERSION-macos.dmg" "Cleaner by Ciro Cesar Maciel $VERSION"
 
             - name: Self-test
               run: CLEANER_NO_ADMIN=1 dist/Cleaner.app/Contents/MacOS/Cleaner --selftest

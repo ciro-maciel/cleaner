@@ -12,7 +12,10 @@ struct MenuPanel: View {
         let cap = monitor.historyLength
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Cleaner").zenDisplay(20)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Cleaner").zenDisplay(20)
+                    MakerLink(source: "oss-cleaner-menubar")
+                }
                 Spacer()
                 Text("ligado há \(Format.uptime(s.uptime))").zenData(11, color: Zen.gray5)
             }
