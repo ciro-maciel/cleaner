@@ -152,7 +152,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         MainActor.assumeIsolated {
             SystemMonitor.shared.start()
             StatusItem.shared.sync()
-            MainWindow.show()
+            // With the menu bar item on, Cleaner starts there only, no window (the Ciro,
+            // 14/10/2026). The panel or opening the app again brings the window.
+            if MainWindow.menuBarOn && !CommandLine.arguments.contains("--screenshots") {
+                NSApp.setActivationPolicy(.accessory)
+            } else {
+                MainWindow.show()
+            }
             // Reading is free of risk: measure everything at launch so the overview opens
             // with numbers. Screenshot runs drive their own scans.
             if !CommandLine.arguments.contains("--screenshots") {
