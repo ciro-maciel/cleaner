@@ -17,7 +17,8 @@ name: Cleaner — release
 # `xcrun stapler staple` on the .dmg, between "Check the signature" and "Publish".
 #
 # ILLUSTRATIONS: the official build adds the screens' licensed illustrations from the private
-# ciro-maciel/cleaner-assets (step "Licensed illustrations"); this repository never holds them.
+# ciro-maciel/assets, illustrations/cleaner (step "Licensed illustrations"); this repository never
+# holds them.
 #
 # The secrets live in the "release" environment, which only main can use. Pull requests
 # never see them (ci.yml builds those).
@@ -112,7 +113,8 @@ jobs:
 
             # The official build carries the screens' illustrations. They come from a licensed
             # stock gallery that can't be redistributed, so they live in the private
-            # ciro-maciel/cleaner-assets and are read here with a read-only deploy key. A build from
+            # ciro-maciel/assets (illustrations/cleaner) and are read here with a read-only deploy key; only
+            # that folder is checked out. A build from
             # this repository alone draws the Tabler icon of each screen instead.
             - name: Licensed illustrations
               env:
@@ -121,11 +123,14 @@ jobs:
                   KEY="$RUNNER_TEMP/assets-key"
                   printf '%s\n' "$DEPLOY_KEY" >"$KEY"
                   chmod 600 "$KEY"
-                  GIT_SSH_COMMAND="ssh -i $KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" \
-                      git clone -q --depth 1 git@github.com:ciro-maciel/cleaner-assets.git "$RUNNER_TEMP/assets"
+                  # Exported, not inline: with a partial clone the sparse checkout fetches the files
+                  # after the clone, and that fetch needs the key too.
+                  export GIT_SSH_COMMAND="ssh -i $KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+                  git clone -q --depth 1 --filter=blob:none --sparse git@github.com:ciro-maciel/assets.git "$RUNNER_TEMP/assets"
+                  git -C "$RUNNER_TEMP/assets" sparse-checkout set illustrations/cleaner
                   rm -f "$KEY"
                   mkdir -p Resources/Illustrations
-                  cp "$RUNNER_TEMP"/assets/Illustrations/*.png Resources/Illustrations/
+                  cp "$RUNNER_TEMP"/assets/illustrations/cleaner/*.png Resources/Illustrations/
                   for n in scan cleanup uninstall diskmap startup quarantine done access; do
                       [ -f "Resources/Illustrations/$n.png" ] || { echo "missing illustration: $n"; exit 1; }
                   done

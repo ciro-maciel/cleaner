@@ -1,5 +1,5 @@
 .build/
 dist/
 .DS_Store
-# Licensed illustrations: only the official build has them (ciro-maciel/cleaner-assets).
+# Licensed illustrations: only the official build has them (the private ciro-maciel/assets, illustrations/cleaner).
 Resources/Illustrations/
