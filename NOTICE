@@ -13,6 +13,6 @@ This repository includes third-party material under its own license:
 - The app icon (Resources/AppIcon.icns) is the letter C set in Candal, by Vernon Adams.
   SIL Open Font License 1.1. https://fonts.google.com/specimen/Candal
 
-- The logotype (Resources/Logotype.png): the bolt, the word and "by Ciro Cesar Maciel". It is
-  the maker's mark and is not covered by the MIT License. A fork that ships its own build should
-  use its own name and mark.
+- The logotype (the `Logotype` view in Sources/Cleaner/UI/Theme.swift): the bolt, the word and
+  "by Ciro Cesar Maciel". It is the maker's mark and is not covered by the MIT License. A fork
+  that ships its own build should use its own name and mark.
