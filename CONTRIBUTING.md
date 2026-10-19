@@ -7,7 +7,7 @@ Thanks for helping. Cleaner deletes files on other people's Macs, so the bar is 
 [`rules.json`](rules.json) decides what Cleaner offers to clear. A good rule change:
 
 - names a folder that an app **recreates by itself**, or a file the person clearly no longer needs;
-- says in `why` what the folder is, in one sentence a non-developer understands;
+- says in `why` what the folder is, in one sentence a non-developer understands, in Brazilian Portuguese, with the English in `titleEn` and `whyEn`;
 - sets `risk` honestly (`low`, `medium`, `high`) and `defaultOn: false` for anything above `low`;
 - adds to `exclude` anything inside that must survive.
 
@@ -29,6 +29,7 @@ House rules:
 - No network code. Cleaner never talks to the internet, and that is a promise in the README. A link the person clicks opens in their browser; that is the only way out.
 - Anything that removes goes through the quarantine. Nothing is deleted in place.
 - Every removal asks for the 3-second hold.
+- Every user-facing string exists in English and Brazilian Portuguese (`Resources/en.lproj` and `Resources/pt-BR.lproj`, through `L("English text")`); a change that adds text adds both. Check it with `-AppleLanguages "(en)"` and `-AppleLanguages "(pt-BR)"`.
 
 ## Reporting a bug
 

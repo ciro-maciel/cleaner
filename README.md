@@ -6,7 +6,7 @@ Every rule it cleans by is in one readable file, [`rules.json`](rules.json). Not
 
 [Português](README.pt-BR.md)
 
-![Cleaner overview: 2.1 GB that can be freed, disk usage and the four tools](docs/overview.webp)
+![Cleaner overview: 4 GB that can be freed, disk usage and the four tools](docs/overview.webp)
 
 ## Install
 
@@ -47,13 +47,15 @@ The well-known cleaners ask you to trust a "junk" number. Cleaner shows you how 
 
 ## The rules
 
-Eight rules today. Each one says what it is, why it is safe, how risky it is and whether it is on by default:
+Eight rules today. Each one says what it is, why it is safe (in Brazilian Portuguese and in English), how risky it is and whether it is on by default:
 
 ```json
 {
   "id": "app-caches",
   "title": "Caches de aplicativos",
   "why": "Arquivos temporários que cada app recria sozinho quando precisa.",
+  "titleEn": "App caches",
+  "whyEn": "Temporary files each app recreates by itself when it needs them.",
   "risk": "low",
   "mode": "children",
   "paths": ["~/Library/Caches"],
@@ -91,7 +93,7 @@ dist/Cleaner.app/Contents/MacOS/Cleaner --screenshots /tmp/shots        # captur
 ## Limits
 
 - Apple Silicon and macOS 14 or newer only.
-- The interface is in Portuguese for now.
+- The interface is in English and Brazilian Portuguese, following the Mac's language.
 - Items protected by System Integrity Protection stay where they are. That is macOS working as intended.
 - No duplicate finder, no malware scan and no app updater.
 

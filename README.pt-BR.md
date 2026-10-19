@@ -6,7 +6,7 @@ Toda regra que ele usa para limpar está num arquivo que dá para ler, o [`rules
 
 [English](README.md)
 
-![Visão geral do Cleaner: 2,1 GB para liberar, uso do disco e as quatro ferramentas](docs/overview.webp)
+![Visão geral do Cleaner: 4 GB para liberar, uso do disco e as quatro ferramentas](docs/pt-BR/overview.webp)
 
 ## Instalar
 
@@ -31,7 +31,7 @@ Os limpadores conhecidos pedem que você confie num número de "lixo". O Cleaner
   - item do sistema (`EACCES`): pede a senha de administrador uma vez por ação, num pedido que diz o que vai fazer e com quais itens;
   - item protegido (`EPERM`, como Lixeira, Mail, contêineres sem Acesso Total ao Disco ou itens do SIP): nunca pede senha, porque senha não resolveria. O item fica no lugar, e o aviso leva aos Ajustes.
 
-![Limpeza: cada item, a regra que o encontrou e o tamanho](docs/cleanup.webp)
+![Limpeza: cada item, a regra que o encontrou e o tamanho](docs/pt-BR/cleanup.webp)
 
 ## O que ele faz
 
@@ -45,7 +45,7 @@ Os limpadores conhecidos pedem que você confie num número de "lixo". O Cleaner
 | Quarentena | Lotes com o caminho de origem; devolve com um clique; apaga sozinho depois de 7 dias |
 | Barra de menus | Processador, memória, rede, disco e bateria ao vivo, e quanto dá para liberar agora |
 
-<img src="docs/menubar.webp" alt="O painel da barra de menus: processador, memória, rede, disco e bateria" width="300">
+<img src="docs/pt-BR/menubar.webp" alt="O painel da barra de menus: processador, memória, rede, disco e bateria" width="300">
 
 ## A desinstalação completa
 
@@ -94,7 +94,7 @@ dist/Cleaner.app/Contents/MacOS/Cleaner --screenshots /tmp/shots        # captur
 ## Limites
 
 - Só Apple Silicon e macOS 14 ou mais novo.
-- A interface está em português.
+- A interface está em inglês e em português do Brasil, conforme o idioma do Mac.
 - Itens protegidos pelo SIP ficam onde estão. É o macOS funcionando como deve.
 - Não procura duplicados, não faz varredura de malware e não atualiza apps.
 
