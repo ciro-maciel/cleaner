@@ -5,10 +5,10 @@ struct OverviewScreen: View {
 
     var body: some View {
         Page {
-            PageHeader(crumb: "Cleaner", title: "Visão geral",
-                       subtitle: "O que ocupa o seu Mac e o que dá para liberar sem perder nada. Tudo o que sai passa 7 dias na quarentena.") {
+            PageHeader(crumb: "Cleaner", title: L("Overview"),
+                       subtitle: L("What takes up space on your Mac and what can be freed without losing anything. Everything removed spends 7 days in the quarantine.")) {
                 Button { Task { await model.scanEverything() } } label: {
-                    ButtonLabel(title: model.scanningAnything ? "Varrendo…" : "Varrer o Mac", icon: "scan", color: .white)
+                    ButtonLabel(title: model.scanningAnything ? L("Scanning…") : L("Scan Your Mac"), icon: "scan", color: .white)
                 }
                 .buttonStyle(ZenButtonStyle(kind: .primary))
                 .disabled(model.scanningAnything)
@@ -27,20 +27,20 @@ struct OverviewScreen: View {
         HStack(alignment: .center, spacing: 48) {
             if model.cleanupGroups == nil && !model.cleanupScanning {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Dá para liberar").zenLabel(11)
-                    Text("Ainda não varremos").zenDisplay(56)
-                    Text("A varredura só lê: mede caches, registros, instaladores esquecidos, apps e itens de inicialização. Nada sai do lugar sem você revisar.")
+                    Text(L("Can be freed")).zenLabel(11)
+                    Text(L("Not scanned yet")).zenDisplay(56)
+                    Text(L("The scan only reads: it measures caches, logs, forgotten installers, apps and startup items. Nothing moves until you review it."))
                         .zenNote().frame(maxWidth: 460, alignment: .leading)
                 }
             } else if model.cleanupScanning {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Dá para liberar").zenLabel(11)
-                    Text("Medindo…").zenDisplay(56)
-                    Text("Lendo as pastas das regras de limpeza. Leva de alguns segundos a um minuto.").zenNote()
+                    Text(L("Can be freed")).zenLabel(11)
+                    Text(L("Measuring…")).zenDisplay(56)
+                    Text(L("Reading the folders of the cleanup rules. It takes from a few seconds to a minute.")).zenNote()
                 }
             } else {
-                BigMetric(label: "Dá para liberar", bytes: model.cleanupTotal,
-                          note: "Soma do que a Limpeza encontrou agora, em \(Format.plural(model.cleanupGroups?.flatMap(\.items).count ?? 0, "item", "itens")). Medido em blocos ocupados no disco, como o Finder.")
+                BigMetric(label: L("Can be freed"), bytes: model.cleanupTotal,
+                          note: L("Everything Cleanup found just now, across %@. Measured in blocks used on disk, as the Finder does.", Format.plural(model.cleanupGroups?.flatMap(\.items).count ?? 0, L("item"), L("items"))))
             }
             Spacer(minLength: 0)
             Group {
@@ -53,16 +53,16 @@ struct OverviewScreen: View {
     private var disk: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Disco").zenLabel(10, color: Zen.gray5)
+                Text(L("Disk")).zenLabel(10, color: Zen.gray5)
                 Spacer()
                 if let v = model.volume {
-                    Text("\(Format.bytes(v.used)) usados de \(Format.bytes(v.total)) · \(Format.bytes(v.available)) livres")
+                    Text(L("%1$@ used of %2$@ · %3$@ available", Format.bytes(v.used), Format.bytes(v.total), Format.bytes(v.available)))
                         .zenData(13)
                 }
             }
             if let v = model.volume {
                 ShareBar(fraction: Double(v.used) / Double(max(v.total, 1)), height: 10)
-                Text("Livres conta o espaço que o macOS consegue liberar sozinho, como o Finder mostra.").zenNote()
+                Text(L("Available counts the space macOS can free by itself, as the Finder shows it.")).zenNote()
             }
         }
     }
@@ -71,18 +71,18 @@ struct OverviewScreen: View {
     private var cells: some View {
         HStack(spacing: 0) {
             OverviewCell(screen: .cleanup, value: model.cleanupGroups.map { _ in Format.bytes(model.cleanupTotal) } ?? "—",
-                         note: model.cleanupGroups.map { $0.isEmpty ? "nada a limpar agora" : "em \(Format.plural($0.count, "regra", "regras")) de limpeza" }
-                               ?? (model.cleanupScanning ? "medindo…" : "varra para medir"))
+                         note: model.cleanupGroups.map { $0.isEmpty ? L("nothing to clean now") : L("in %@", Format.plural($0.count, L("cleanup rule"), L("cleanup rules"))) }
+                               ?? (model.cleanupScanning ? L("measuring…") : L("scan to measure")))
             divider
             OverviewCell(screen: .uninstaller, value: model.apps.isEmpty ? "—" : Format.count(model.apps.count),
-                         note: model.apps.isEmpty ? (model.appsLoading ? "listando…" : "varra para listar") : "apps, \(Format.bytes(model.appsTotal)) ao todo")
+                         note: model.apps.isEmpty ? (model.appsLoading ? L("listing…") : L("scan to list")) : L("apps, %@ in all", Format.bytes(model.appsTotal)))
             divider
             OverviewCell(screen: .startup, value: model.startupItems.isEmpty ? "—" : Format.count(model.startupItems.filter { !$0.disabled }.count),
-                         note: model.startupItems.isEmpty ? (model.startupLoading ? "lendo…" : "varra para listar")
-                               : "abrem sozinhos · \(Format.plural(model.backgroundApps.count, "app", "apps")) rodando sem janela")
+                         note: model.startupItems.isEmpty ? (model.startupLoading ? L("reading…") : L("scan to list"))
+                               : L("start automatically · %@ running without a window", Format.plural(model.backgroundApps.count, L("app"), L("apps"))))
             divider
             OverviewCell(screen: .quarantine, value: Format.bytes(model.quarantineBytes),
-                         note: model.batches.isEmpty ? "nada guardado agora" : "em \(Format.plural(model.batches.count, "lote", "lotes")), some em 7 dias")
+                         note: model.batches.isEmpty ? L("nothing kept now") : L("in %@, gone after 7 days", Format.plural(model.batches.count, L("batch"), L("batches"))))
         }
         .zenBorder()
     }
@@ -120,18 +120,18 @@ struct OverviewCell: View {
 
 struct AccessBanner: View {
     var body: some View {
-        Banner(icon: "lock", title: "Ligue o Acesso Total ao Disco",
-               text: "Sem ele o macOS esconde a Lixeira, o Mail e os contêineres dos apps, e a varredura fica pela metade. Em Ajustes, ligue o Cleaner na lista; se o aviso continuar, reabra o Cleaner.") {
+        Banner(icon: "lock", title: L("Turn on Full Disk Access"),
+               text: L("Without it, macOS hides the Trash, Mail and app containers, and the scan only sees half. In Settings, turn on Cleaner in the list; if this notice stays, reopen Cleaner.")) {
             HStack(spacing: 8) {
                 Button { Permissions.openFullDiskAccessSettings() } label: {
-                    ButtonLabel(title: "Abrir Ajustes", icon: "settings")
+                    ButtonLabel(title: L("Open Settings"), icon: "settings")
                 }
                 .buttonStyle(ZenButtonStyle(kind: .secondary))
                 Button { Permissions.relaunch() } label: {
-                    ButtonLabel(title: "Já liguei: reabrir", icon: "refresh")
+                    ButtonLabel(title: L("Turned on: reopen"), icon: "refresh")
                 }
                 .buttonStyle(ZenButtonStyle(kind: .subtle))
-                .help("O macOS pode aplicar a permissão só depois de reabrir o Cleaner")
+                .help(L("macOS may apply the permission only after Cleaner reopens"))
             }
         }
     }

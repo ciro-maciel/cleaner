@@ -11,28 +11,28 @@ struct SettingsScreen: View {
 
     var body: some View {
         Page {
-            PageHeader(crumb: "Cleaner", title: "Geral",
-                       subtitle: "Como o Cleaner abre, onde ele fica e o que ele precisa do macOS para funcionar.")
+            PageHeader(crumb: "Cleaner", title: L("General"),
+                       subtitle: L("How Cleaner opens, where it lives and what it needs from macOS to work."))
 
             LaunchAtLoginRow().padding(.bottom, 16)
             MenuBarSettings().padding(.bottom, 40)
 
-            Text("Permissões").zenLabel(10, color: Zen.gray5).padding(.bottom, 12)
+            Text(L("Permissions")).zenLabel(10, color: Zen.gray5).padding(.bottom, 12)
             VStack(spacing: 0) {
                 PermissionRow(
-                    title: "Acesso Total ao Disco",
+                    title: L("Full Disk Access"),
                     text: model.hasFullDiskAccess
-                        ? "Ligado. O Cleaner mede e limpa a Lixeira, o Mail e os contêineres dos apps."
-                        : "Desligado. Sem ele o macOS esconde a Lixeira, o Mail e os contêineres dos apps: a varredura fica pela metade e esses itens não saem. Em Ajustes do Sistema, ligue o Cleaner na lista.",
+                        ? L("On. Cleaner measures and cleans the Trash, Mail and app containers.")
+                        : L("Off. Without it, macOS hides the Trash, Mail and app containers: the scan only sees half and those items cannot be removed. In System Settings, turn on Cleaner in the list."),
                     isOn: model.hasFullDiskAccess
                 ) {
                     if !model.hasFullDiskAccess {
                         HStack(spacing: 8) {
-                            Button { Permissions.openFullDiskAccessSettings() } label: { ButtonLabel(title: "Abrir Ajustes do Sistema", icon: "settings", color: .white) }
+                            Button { Permissions.openFullDiskAccessSettings() } label: { ButtonLabel(title: L("Open System Settings"), icon: "settings", color: .white) }
                                 .buttonStyle(ZenButtonStyle(kind: .primary))
-                            Button { Permissions.relaunch() } label: { ButtonLabel(title: "Já liguei: reabrir", icon: "refresh") }
+                            Button { Permissions.relaunch() } label: { ButtonLabel(title: L("Turned on: reopen"), icon: "refresh") }
                                 .buttonStyle(ZenButtonStyle(kind: .subtle))
-                                .help("O macOS pode aplicar a permissão só depois de reabrir o Cleaner")
+                                .help(L("macOS may apply the permission only after Cleaner reopens"))
                         }
                     }
                 }
@@ -40,8 +40,8 @@ struct SettingsScreen: View {
                 HelperRow()
                 RowDivider()
                 PermissionRow(
-                    title: "Senha de administrador",
-                    text: "Pedida só quando você move, devolve ou apaga itens que ficam fora da sua pasta e pertencem ao sistema, ou liga e desliga um item de inicialização do sistema. Cada pedido diz o que vai fazer e com quais itens. A Lixeira, os caches e o Mail nunca pedem senha: eles dependem do Acesso Total ao Disco.",
+                    title: L("Administrator password"),
+                    text: L("Asked only when you move, restore or delete items that live outside your home folder and belong to the system, or turn a system startup item on or off. Each request says what it will do and to which items. The Trash, caches and Mail never ask for a password: they depend on Full Disk Access."),
                     isOn: nil
                 ) { EmptyView() }
             }
@@ -61,17 +61,17 @@ struct LaunchAtLoginRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Abrir ao ligar o Mac").font(Zen.font(14, .bold)).foregroundStyle(Zen.gray9)
+                Text(L("Open at Login")).font(Zen.font(14, .bold)).foregroundStyle(Zen.gray9)
                 Text(note).zenData(12, color: error == nil ? Zen.gray6 : Zen.red7)
                 if status == .requiresApproval {
-                    Button { SMAppService.openSystemSettingsLoginItems() } label: { ButtonLabel(title: "Abrir Itens de início", icon: "settings") }
+                    Button { SMAppService.openSystemSettingsLoginItems() } label: { ButtonLabel(title: L("Open Login Items"), icon: "settings") }
                         .buttonStyle(ZenButtonStyle(kind: .secondary, height: 30))
                         .padding(.top, 8)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Button(action: toggle) {
-                HStack(spacing: 8) { CheckBox(state: isOn ? .on : .off); Text(isOn ? "Ligado" : "Desligado").zenData(13, color: Zen.gray9) }
+                HStack(spacing: 8) { CheckBox(state: isOn ? .on : .off); Text(isOn ? L("On") : L("Off")).zenData(13, color: Zen.gray9) }
             }
             .buttonStyle(.plain)
         }
@@ -83,9 +83,9 @@ struct LaunchAtLoginRow: View {
     private var note: String {
         if let error { return error }
         switch status {
-        case .enabled: return "O Cleaner abre sozinho quando você entra no Mac, direto na barra de menus."
-        case .requiresApproval: return "Falta aprovar o Cleaner em Ajustes do Sistema, Geral, Itens de início."
-        default: return "Desligado: o Cleaner só abre quando você abrir."
+        case .enabled: return L("Cleaner opens by itself when you log in to your Mac, straight into the menu bar.")
+        case .requiresApproval: return L("Cleaner still needs your approval in System Settings, General, Login Items.")
+        default: return L("Off: Cleaner opens only when you open it.")
         }
     }
 
@@ -94,7 +94,7 @@ struct LaunchAtLoginRow: View {
         do {
             if isOn { try SMAppService.mainApp.unregister() } else { try SMAppService.mainApp.register() }
         } catch {
-            self.error = "O macOS não aceitou a mudança: \(error.localizedDescription)"
+            self.error = L("macOS did not accept the change: %@", error.localizedDescription)
         }
         status = SMAppService.mainApp.status
     }
@@ -105,9 +105,9 @@ private struct HelperRow: View {
     @State private var state = Helper.state
 
     var body: some View {
-        PermissionRow(title: "Ajudante para liberar memória", text: text, isOn: state == .ready) {
+        PermissionRow(title: L("Helper to free up memory"), text: text, isOn: state == .ready) {
             if state == .needsApproval {
-                Button { Helper.openApproval() } label: { ButtonLabel(title: "Abrir Itens de início", icon: "settings") }
+                Button { Helper.openApproval() } label: { ButtonLabel(title: L("Open Login Items"), icon: "settings") }
                     .buttonStyle(ZenButtonStyle(kind: .secondary))
             }
         }
@@ -116,10 +116,10 @@ private struct HelperRow: View {
 
     private var text: String {
         switch state {
-        case .ready: return "Aprovado. O botão Liberar, na barra de menus, devolve a memória que o macOS guarda em cache."
-        case .needsApproval: return "Esperando a sua aprovação em Ajustes do Sistema, Geral, Itens de início. Só o botão Liberar depende dele."
-        case .notRegistered: return "Ainda não pedido. O macOS pede a aprovação na primeira vez que você usar o botão Liberar."
-        case .unavailable(let why): return "O macOS não registrou o ajudante (\(why)). O resto do Cleaner funciona sem ele."
+        case .ready: return L("Approved. The Free Up button in the menu bar gives back the memory macOS keeps as cache.")
+        case .needsApproval: return L("Waiting for your approval in System Settings, General, Login Items. Only the Free Up button depends on it.")
+        case .notRegistered: return L("Not requested yet. macOS asks for approval the first time you use the Free Up button.")
+        case .unavailable(let why): return L("macOS did not register the helper (%@). The rest of Cleaner works without it.", why)
         }
     }
 }

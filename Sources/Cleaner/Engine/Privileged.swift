@@ -26,13 +26,13 @@ enum Privileged {
     static func asAdmin(_ command: String, prompt: String) throws {
         // The self-test runs with CLEANER_NO_ADMIN=1: a password prompt there is a failure to
         // report, not a dialog to wait on.
-        if ProcessInfo.processInfo.environment["CLEANER_NO_ADMIN"] == "1" { throw Failure(message: "pediu a senha de administrador") }
+        if ProcessInfo.processInfo.environment["CLEANER_NO_ADMIN"] == "1" { throw Failure(message: L("asked for the administrator password")) }
         let escaped = command.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
         let promptEscaped = prompt.replacingOccurrences(of: "\"", with: "'")
         let script = "do shell script \"\(escaped)\" with prompt \"\(promptEscaped)\" with administrator privileges"
         let result = run("/usr/bin/osascript", ["-e", script])
         if result.status != 0 {
-            if result.output.contains("-128") { throw Failure(message: "Senha cancelada.") }
+            if result.output.contains("-128") { throw Failure(message: L("Password canceled.")) }
             throw Failure(message: result.output.trimmingCharacters(in: .whitespacesAndNewlines))
         }
     }

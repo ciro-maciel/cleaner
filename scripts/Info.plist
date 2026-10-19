@@ -3,7 +3,12 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDevelopmentRegion</key>
-    <string>pt-BR</string>
+    <string>en</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>pt-BR</string>
+    </array>
     <key>CFBundleExecutable</key>
     <string>Cleaner</string>
     <key>CFBundleIconFile</key>
@@ -31,6 +36,6 @@
     <key>NSHumanReadableCopyright</key>
     <string>Ciro Cesar Maciel</string>
     <key>NSAppleEventsUsageDescription</key>
-    <string>O Cleaner pede a senha de administrador para mover itens do sistema para a quarentena.</string>
+    <string>Cleaner asks for the administrator password to move system items to the quarantine.</string>
 </dict>
 </plist>

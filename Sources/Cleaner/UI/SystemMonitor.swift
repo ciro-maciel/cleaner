@@ -8,12 +8,12 @@ enum MenuMetric: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .cpu: return "Processador"
+        case .cpu: return L("CPU")
         case .gpu: return "GPU"
-        case .memory: return "Memória"
-        case .network: return "Rede"
-        case .disk: return "Disco"
-        case .battery: return "Bateria"
+        case .memory: return L("Memory")
+        case .network: return L("Network")
+        case .disk: return L("Disk")
+        case .battery: return L("Battery")
         }
     }
     var key: String { "menu.\(rawValue)" }
@@ -112,13 +112,13 @@ final class SystemMonitor {
                 AppModel.shared.show(error.localizedDescription, error: true)
             }
         case .needsApproval:
-            helperNote = "Aprove o Cleaner em Itens de início, uma vez"
+            helperNote = L("Approve Cleaner in Login Items, once")
             Helper.openApproval()
         case .notRegistered, .unavailable:
             let why: String
-            if case .unavailable(let m) = state { why = m } else { why = "o macOS não registrou o ajudante" }
+            if case .unavailable(let m) = state { why = m } else { why = L("macOS did not register the helper") }
             helperNote = nil
-            AppModel.shared.show("Não deu para ligar o ajudante: \(why)", error: true)
+            AppModel.shared.show(L("Could not turn on the helper: %@", why), error: true)
         }
     }
 

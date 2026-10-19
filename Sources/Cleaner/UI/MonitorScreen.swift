@@ -8,24 +8,24 @@ struct MonitorScreen: View {
     var body: some View {
         let s = monitor.sample
         Page {
-            PageHeader(crumb: "Cleaner", title: "Monitor",
-                       subtitle: "Como o seu Mac está agora: processador, memória, disco, rede e bateria, medidos a cada \(Int(monitor.interval)) segundos. O mesmo resumo fica na barra de menus.") {
+            PageHeader(crumb: "Cleaner", title: L("Monitor"),
+                       subtitle: L("How your Mac is doing right now: processor, memory, disk, network and battery, measured every %@ seconds. The same summary lives in the menu bar.", String(Int(monitor.interval)))) {
                 IntervalPicker()
             }
 
             grid(s).padding(.bottom, 40)
 
             HStack(alignment: .top, spacing: 32) {
-                ProcessTable(title: "Mais processador", rows: monitor.topByCPU(8)) { "\(Format.decimal($0.cpu))%" }
-                ProcessTable(title: "Mais memória", rows: monitor.topByMemory(8)) { Format.bytes($0.memory) }
+                ProcessTable(title: L("Top CPU"), rows: monitor.topByCPU(8)) { "\(Format.decimal($0.cpu))%" }
+                ProcessTable(title: L("Top Memory"), rows: monitor.topByMemory(8)) { Format.bytes($0.memory) }
             }
             .padding(.bottom, 16)
-            Text("Processador por processo é a média recente do ps, em % de um núcleo: um app pesado passa de 100% num Mac com vários núcleos. Atualiza a cada 4 segundos.")
+            Text(L("CPU per process is the recent average from ps, in % of one core: a heavy app goes past 100% on a Mac with several cores. Updates every 4 seconds."))
                 .zenNote().padding(.bottom, 40)
 
             MenuBarSettings().padding(.bottom, 16)
 
-            Text("\(machine) · ligado há \(Format.uptime(s.uptime)). Temperatura do processador e ventoinhas ficam de fora: o macOS só as entrega por interfaces privadas. A da bateria vem do sensor dela, por leitura pública.")
+            Text(L("%1$@ · up for %2$@. CPU temperature and fans are left out: macOS only provides them through private interfaces. The battery's comes from its own sensor, through a public reading.", machine, Format.uptime(s.uptime)))
                 .zenNote()
         }
         .onAppear { monitor.watchProcesses(true) }
@@ -34,8 +34,8 @@ struct MonitorScreen: View {
 
     private var machine: String {
         let l = monitor.reader.coreLayout
-        let cores = l.efficiency > 0 ? "\(l.performance) núcleos de desempenho e \(l.efficiency) de eficiência" : "\(l.performance) núcleos"
-        return "\(monitor.reader.model), \(cores), \(Format.bytes(monitor.sample.memory.total)) de memória"
+        let cores = l.efficiency > 0 ? L("%1$@ performance cores and %2$@ efficiency cores", String(l.performance), String(l.efficiency)) : L("%@ cores", String(l.performance))
+        return L("%1$@, %2$@, %3$@ of memory", monitor.reader.model, cores, Format.bytes(monitor.sample.memory.total))
     }
 
     private func grid(_ s: SystemSample) -> some View {
@@ -43,9 +43,9 @@ struct MonitorScreen: View {
         let memPct = Double(s.memory.used) / Double(max(s.memory.total, 1))
         return VStack(spacing: 0) {
             HStack(spacing: 0) {
-                MetricCell(icon: "cpu", label: "Processador", value: Format.percentValue(s.cpu.total), unit: "%",
-                           lines: ["Usuário \(Format.percent(s.cpu.user)) · sistema \(Format.percent(s.cpu.system))",
-                                   "Carga média \(Format.decimal(s.cpu.load.0)) · \(Format.decimal(s.cpu.load.1)) · \(Format.decimal(s.cpu.load.2))"]) {
+                MetricCell(icon: "cpu", label: L("CPU"), value: Format.percentValue(s.cpu.total), unit: "%",
+                           lines: [L("User %1$@ · system %2$@", Format.percent(s.cpu.user), Format.percent(s.cpu.system)),
+                                   L("Load average %1$@ · %2$@ · %3$@", Format.decimal(s.cpu.load.0), Format.decimal(s.cpu.load.1), Format.decimal(s.cpu.load.2))]) {
                     VStack(spacing: 10) {
                         Sparkline(values: monitor.cpu, capacity: cap)
                         CoreBars(cores: s.cpu.cores, height: 28)
@@ -53,20 +53,20 @@ struct MonitorScreen: View {
                 }
                 rule
                 MetricCell(icon: "gauge", label: "GPU", value: s.gpu.map(Format.percentValue) ?? "—", unit: s.gpu == nil ? "" : "%",
-                           lines: [s.gpu == nil ? "Esta GPU não informa o uso." : "Uso do processador gráfico", thermalLine(s.thermal)],
+                           lines: [s.gpu == nil ? L("This GPU does not report its usage.") : L("Graphics processor usage"), thermalLine(s.thermal)],
                            alert: s.thermal == .serious || s.thermal == .critical) {
                     Sparkline(values: monitor.gpu, capacity: cap)
                 }
                 rule
-                MetricCell(icon: "stack-2", label: "Memória", value: Format.percentValue(memPct), unit: "%",
-                           lines: ["\(Format.bytes(s.memory.used)) de \(Format.bytes(s.memory.total)) · pressão \(pressure(s.memory.pressure))",
-                                   "Apps \(Format.bytes(s.memory.app)) · fixa \(Format.bytes(s.memory.wired)) · comprimida \(Format.bytes(s.memory.compressed))",
-                                   "Troca \(Format.bytes(s.memory.swapUsed))"],
+                MetricCell(icon: "stack-2", label: L("Memory"), value: Format.percentValue(memPct), unit: "%",
+                           lines: [L("%1$@ of %2$@ · pressure %3$@", Format.bytes(s.memory.used), Format.bytes(s.memory.total), pressure(s.memory.pressure)),
+                                   L("Apps %1$@ · wired %2$@ · compressed %3$@", Format.bytes(s.memory.app), Format.bytes(s.memory.wired), Format.bytes(s.memory.compressed)),
+                                   L("Swap %@", Format.bytes(s.memory.swapUsed))],
                            alert: s.memory.pressure >= 4) {
                     VStack(alignment: .leading, spacing: 10) {
                         Sparkline(values: monitor.memory, capacity: cap)
                         HStack {
-                            Text("Livre \(Format.bytes(s.memory.free)) · cache de arquivos \(Format.bytes(s.memory.cached))")
+                            Text(L("Free %1$@ · file cache %2$@", Format.bytes(s.memory.free), Format.bytes(s.memory.cached)))
                                 .zenData(12, color: Zen.gray6).lineLimit(1)
                             Spacer(minLength: 8)
                             FreeMemoryButton()
@@ -76,17 +76,17 @@ struct MonitorScreen: View {
             }
             Rectangle().fill(Zen.gray2).frame(height: 1)
             HStack(spacing: 0) {
-                MetricCell(icon: "device-sd-card", label: "Disco", value: Format.split(s.disk.free).0, unit: Format.split(s.disk.free).1 + " livres",
-                           lines: ["Lendo \(Format.rate(s.disk.readPerSec)) · gravando \(Format.rate(s.disk.writePerSec))",
-                                   "\(Format.bytes(s.disk.total - s.disk.free)) usados de \(Format.bytes(s.disk.total))"]) {
+                MetricCell(icon: "device-sd-card", label: L("Disk"), value: Format.split(s.disk.free).0, unit: L("%@ free", Format.split(s.disk.free).1),
+                           lines: [L("Reading %1$@ · writing %2$@", Format.rate(s.disk.readPerSec), Format.rate(s.disk.writePerSec)),
+                                   L("%1$@ used of %2$@", Format.bytes(s.disk.total - s.disk.free), Format.bytes(s.disk.total))]) {
                     Sparkline(values: monitor.diskRead, second: monitor.diskWrite, ceiling: nil, capacity: cap)
                 }
                 rule
-                MetricCell(icon: "arrows-down-up", label: "Rede", value: Format.split(s.network.inPerSec).0,
-                           unit: (Format.split(s.network.inPerSec).1 == "bytes" ? "B" : Format.split(s.network.inPerSec).1) + "/s baixando",
-                           lines: ["Enviando \(Format.rate(s.network.outPerSec))",
-                                   s.network.interface.isEmpty ? "Sem conexão Wi-Fi ou cabo" : "\(s.network.interface) · \(s.network.address)",
-                                   "Desde que ligou: \(Format.bytes(s.network.totalIn)) baixados, \(Format.bytes(s.network.totalOut)) enviados"]) {
+                MetricCell(icon: "arrows-down-up", label: L("Network"), value: Format.split(s.network.inPerSec).0,
+                           unit: L("%@/s downloading", Format.split(s.network.inPerSec).1 == "bytes" ? "B" : Format.split(s.network.inPerSec).1),
+                           lines: [L("Uploading %@", Format.rate(s.network.outPerSec)),
+                                   s.network.interface.isEmpty ? L("No Wi-Fi or cable connection") : "\(s.network.interface) · \(s.network.address)",
+                                   L("Since startup: %1$@ down, %2$@ up", Format.bytes(s.network.totalIn), Format.bytes(s.network.totalOut))]) {
                     Sparkline(values: monitor.netIn, second: monitor.netOut, ceiling: nil, capacity: cap)
                 }
                 rule
@@ -99,13 +99,13 @@ struct MonitorScreen: View {
     @ViewBuilder
     private func batteryCell(_ s: SystemSample) -> some View {
         if let b = s.battery {
-            MetricCell(icon: b.charging ? "battery-charging" : "battery", label: "Bateria", value: "\(b.percent)", unit: "%",
+            MetricCell(icon: b.charging ? "battery-charging" : "battery", label: L("Battery"), value: "\(b.percent)", unit: "%",
                        lines: Self.batteryLines(b), alert: !b.onAC && b.percent <= 10) {
                 ShareBar(fraction: Double(b.percent) / 100, height: 10).padding(.vertical, 23)
             }
         } else {
-            MetricCell(icon: "bolt", label: "Energia", value: "Tomada", unit: "",
-                       lines: ["Este Mac não tem bateria.", thermalLine(s.thermal)]) {
+            MetricCell(icon: "bolt", label: L("Power"), value: L("Plugged In"), unit: "",
+                       lines: [L("This Mac has no battery."), thermalLine(s.thermal)]) {
                 Color.clear.frame(height: 56)
             }
         }
@@ -113,16 +113,16 @@ struct MonitorScreen: View {
 
     static func batteryLines(_ b: SystemSample.Battery) -> [String] {
         var lines: [String] = []
-        let state = b.charging ? "Carregando" : (b.onAC ? "Na tomada, sem carregar" : "Na bateria")
-        lines.append(b.minutesLeft.map { "\(state) · \(b.charging ? "cheia em" : "dura mais") \(Format.minutes($0))" } ?? state)
+        let state = b.charging ? L("Charging") : (b.onAC ? L("Plugged in, not charging") : L("On battery"))
+        lines.append(b.minutesLeft.map { b.charging ? L("%1$@ · full in %2$@", state, Format.minutes($0)) : L("%1$@ · %2$@ left", state, Format.minutes($0)) } ?? state)
         var health: [String] = []
-        if let h = b.health { health.append("saúde \(Format.percent(h))") }
-        if let c = b.cycles { health.append("\(c) ciclos") }
+        if let h = b.health { health.append(L("health %@", Format.percent(h))) }
+        if let c = b.cycles { health.append(L("%@ cycles", Format.count(c))) }
         if !health.isEmpty { lines.append(health.joined(separator: " · ").capitalizedFirst) }
         var phys: [String] = []
         if let t = b.temperature { phys.append("\(Format.decimal(t)) °C") }
-        if let w = b.watts, abs(w) >= 0.1 { phys.append("\(w > 0 ? "entrando" : "saindo") \(Format.decimal(abs(w))) W") }
-        if let a = b.adapterWatts, b.onAC { phys.append("carregador de \(a) W") }
+        if let w = b.watts, abs(w) >= 0.1 { phys.append(w > 0 ? L("in %@ W", Format.decimal(abs(w))) : L("out %@ W", Format.decimal(abs(w)))) }
+        if let a = b.adapterWatts, b.onAC { phys.append(L("%@ W charger", String(a))) }
         if !phys.isEmpty { lines.append(phys.joined(separator: " · ").capitalizedFirst) }
         return lines
     }
@@ -130,15 +130,15 @@ struct MonitorScreen: View {
     private var rule: some View { Rectangle().fill(Zen.gray2).frame(width: 1) }
 
     private func pressure(_ level: Int) -> String {
-        switch level { case 4: return "crítica"; case 2: return "alta"; default: return "normal" }
+        switch level { case 4: return L("critical"); case 2: return L("high"); default: return L("normal") }
     }
 
     private func thermalLine(_ t: ProcessInfo.ThermalState) -> String {
         switch t {
-        case .nominal: return "Temperatura normal"
-        case .fair: return "Esquentando um pouco"
-        case .serious: return "Quente: o macOS reduz o ritmo"
-        case .critical: return "Muito quente: desempenho reduzido"
+        case .nominal: return L("Normal temperature")
+        case .fair: return L("Warming up a little")
+        case .serious: return L("Hot: macOS slows down")
+        case .critical: return L("Very hot: reduced performance")
         @unknown default: return ""
         }
     }
@@ -186,7 +186,7 @@ struct ProcessTable: View {
             Text(title).zenLabel(10, color: Zen.gray5)
             TableCard {
                 if rows.isEmpty {
-                    Text("Lendo os processos…").zenData(12, color: Zen.gray5)
+                    Text(L("Reading processes…")).zenData(12, color: Zen.gray5)
                         .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20).padding(.vertical, 14)
                 }
                 ForEach(Array(rows.enumerated()), id: \.element.id) { i, row in
@@ -231,7 +231,7 @@ struct IntervalPicker: View {
             }
         }
         .zenBorder(Zen.gray3)
-        .help("De quanto em quanto tempo o Cleaner mede")
+        .help(L("How often Cleaner measures"))
     }
 }
 
@@ -245,13 +245,13 @@ struct MenuBarSettings: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Barra de menus").font(Zen.font(14, .bold)).foregroundStyle(Zen.gray9)
-                    Text("O resumo fica ao lado do relógio. Com ele ligado, fechar a janela não fecha o Cleaner.")
+                    Text(L("Menu Bar")).font(Zen.font(14, .bold)).foregroundStyle(Zen.gray9)
+                    Text(L("The summary sits next to the clock. With it on, closing the window does not quit Cleaner."))
                         .zenData(12, color: Zen.gray6)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Button { enabled.toggle(); StatusItem.shared.sync() } label: {
-                    HStack(spacing: 8) { CheckBox(state: enabled ? .on : .off); Text(enabled ? "Ligada" : "Desligada").zenData(13, color: Zen.gray9) }
+                    HStack(spacing: 8) { CheckBox(state: enabled ? .on : .off); Text(enabled ? L("On [menu bar]") : L("Off [menu bar]")).zenData(13, color: Zen.gray9) }
                 }
                 .buttonStyle(.plain)
             }
@@ -285,10 +285,10 @@ extension Format {
     static func percentValue(_ fraction: Double) -> String { "\(Int((fraction * 100).rounded()))" }
     /// 0.123 → "12%"
     static func percent(_ fraction: Double) -> String { "\(Int((fraction * 100).rounded()))%" }
-    /// 1.234 → "1,2"
+    /// 1.234 → "1,2" in Portuguese, "1.2" in English
     static func decimal(_ value: Double) -> String {
         let f = NumberFormatter()
-        f.locale = Locale(identifier: "pt_BR")
+        f.locale = L10n.locale
         f.minimumFractionDigits = 1
         f.maximumFractionDigits = 1
         return f.string(from: NSNumber(value: value)) ?? "\(value)"

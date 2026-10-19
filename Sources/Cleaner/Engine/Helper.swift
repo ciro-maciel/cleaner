@@ -60,10 +60,10 @@ enum Helper {
         return try await withCheckedThrowingContinuation { cont in
             let once = OnceBox()
             let proxy = c.remoteObjectProxyWithErrorHandler { error in
-                if once.take() { cont.resume(throwing: Failure(message: "O ajudante não respondeu: \(error.localizedDescription)")) }
+                if once.take() { cont.resume(throwing: Failure(message: L("The helper did not respond: %@", error.localizedDescription))) }
             }
             guard let helper = proxy as? CleanerHelperProtocol else {
-                if once.take() { cont.resume(throwing: Failure(message: "Ajudante indisponível.")) }
+                if once.take() { cont.resume(throwing: Failure(message: L("Helper unavailable."))) }
                 return
             }
             body(helper) { result in if once.take() { cont.resume(with: result) } }
@@ -77,7 +77,7 @@ enum Helper {
     static func purgeMemory() async throws {
         try await call { helper, done in
             helper.purgeMemory { ok, message in
-                done(ok ? .success(()) : .failure(Failure(message: message.isEmpty ? "O purge falhou." : message)))
+                done(ok ? .success(()) : .failure(Failure(message: message.isEmpty ? L("The purge failed.") : message)))
             }
         } as Void
     }

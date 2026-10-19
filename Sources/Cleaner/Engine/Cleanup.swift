@@ -9,6 +9,9 @@ struct CleanupRule: Codable, Identifiable, Hashable {
     let id: String
     let title: String
     let why: String
+    /// English title and reason; title and why are the Portuguese originals.
+    var titleEn: String? = nil
+    var whyEn: String? = nil
     let risk: Risk
     let mode: Mode
     let paths: [String]
@@ -31,6 +34,11 @@ struct CleanupRule: Codable, Identifiable, Hashable {
     }
 
     private struct File: Codable { let rules: [CleanupRule] }
+
+    /// The title and the reason in the interface language. A rule without English shows its
+    /// Portuguese.
+    var displayTitle: String { L10n.isPortuguese ? title : (titleEn ?? title) }
+    var displayWhy: String { L10n.isPortuguese ? why : (whyEn ?? why) }
 }
 
 struct CleanupItem: Identifiable, Hashable {
@@ -99,7 +107,7 @@ enum CleanupScanner {
                     guard size > 0 else { continue }
                     var item = CleanupItem(path: path, size: size, ruleID: rule.id)
                     if rule.skipRunningApps == true, running.contains(where: { name == $0 || name.hasPrefix($0 + ".") }) {
-                        item.hold = "app aberto"
+                        item.hold = L("app open")
                     }
                     items.append(item)
                 }

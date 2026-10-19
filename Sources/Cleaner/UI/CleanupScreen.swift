@@ -6,15 +6,15 @@ struct CleanupScreen: View {
 
     var body: some View {
         Page {
-            PageHeader(crumb: "Cleaner", title: "Limpeza",
-                       subtitle: "Só entra o que as regras públicas do Cleaner nomeiam: pastas que os apps recriam sozinhos. Revise, desmarque o que quiser manter e mova para a quarentena.") {
+            PageHeader(crumb: "Cleaner", title: L("Cleanup"),
+                       subtitle: L("Only what Cleaner's public rules name gets in: folders that apps recreate by themselves. Review, untick what you want to keep, and move the rest to the quarantine.")) {
                 Button { Task { await model.scanCleanup() } } label: {
-                    ButtonLabel(title: model.cleanupScanning ? "Varrendo…" : "Varrer de novo", icon: "refresh")
+                    ButtonLabel(title: model.cleanupScanning ? L("Scanning…") : L("Scan Again"), icon: "refresh")
                 }
                 .buttonStyle(ZenButtonStyle(kind: .secondary))
                 .disabled(model.cleanupScanning || model.cleanupGroups == nil)
 
-                HoldButton(title: model.cleanupSelectedCount == 0 ? "Nada marcado" : "Mover \(Format.bytes(model.cleanupSelectedBytes))",
+                HoldButton(title: model.cleanupSelectedCount == 0 ? L("Nothing Selected") : L("Move %@", Format.bytes(model.cleanupSelectedBytes)),
                            icon: "trash") { Task { await model.cleanSelected() } }
                     .disabled(model.cleanupSelectedCount == 0 || model.cleanupScanning)
             }
@@ -22,23 +22,23 @@ struct CleanupScreen: View {
             if model.cleanupScanning && model.cleanupGroups == nil {
                 VStack(spacing: 16) {
                     ScanningAnimation(size: 200)
-                    Text("Medindo as pastas das regras…").zenLabel(11, color: Zen.gray5)
+                    Text(L("Measuring the rule folders…")).zenLabel(11, color: Zen.gray5)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 56)
             } else if let groups = model.cleanupGroups {
                 if groups.isEmpty {
-                    EmptyState(illustration: "done", title: "Nada para limpar",
-                               subtitle: "Nenhuma regra encontrou o que tirar. Volte daqui a alguns dias: caches crescem com o uso.")
+                    EmptyState(illustration: "done", title: L("Nothing to clean"),
+                               subtitle: L("No rule found anything to remove. Come back in a few days: caches grow with use."))
                 } else {
                     summary(groups).padding(.bottom, 32)
                     table(groups)
-                    Text("Segure o botão por 3 segundos para mover. Tudo fica 7 dias na Quarentena e volta ao lugar com um clique. Itens de apps abertos começam desmarcados.")
+                    Text(L("Hold the button for 3 seconds to move. Everything stays 7 days in the Quarantine and goes back with one click. Items of open apps start unticked."))
                         .zenNote().padding(.top, 16)
                 }
             } else {
-                EmptyState(illustration: "cleanup", title: "Ainda não varremos",
-                           subtitle: "A varredura só lê. Ela mede caches, registros, Lixeira, instaladores velhos e caches de desenvolvimento.") {
-                    Button { Task { await model.scanCleanup() } } label: { ButtonLabel(title: "Varrer agora", icon: "scan", color: .white) }
+                EmptyState(illustration: "cleanup", title: L("Not scanned yet"),
+                           subtitle: L("The scan only reads. It measures caches, logs, the Trash, old installers and developer caches.")) {
+                    Button { Task { await model.scanCleanup() } } label: { ButtonLabel(title: L("Scan Now"), icon: "scan", color: .white) }
                         .buttonStyle(ZenButtonStyle(kind: .primary))
                 }
             }
@@ -47,19 +47,20 @@ struct CleanupScreen: View {
 
     private func summary(_ groups: [CleanupGroup]) -> some View {
         HStack(alignment: .bottom, spacing: 48) {
-            BigMetric(label: "Marcado para sair", bytes: model.cleanupSelectedBytes,
-                      note: "\(Format.plural(model.cleanupSelectedCount, "item marcado", "itens marcados")) de \(Format.count(groups.flatMap(\.items).count)), em \(Format.plural(groups.count, "regra", "regras")). Total encontrado: \(Format.bytes(model.cleanupTotal)).",
+            BigMetric(label: L("Selected to remove"), bytes: model.cleanupSelectedBytes,
+                      note: L("%1$@ of %2$@, in %3$@. Total found: %4$@.", Format.plural(model.cleanupSelectedCount, L("item selected"), L("items selected")),
+                              Format.count(groups.flatMap(\.items).count), Format.plural(groups.count, L("rule"), L("rules")), Format.bytes(model.cleanupTotal)),
                       size: 72)
             Spacer()
             if let at = model.cleanupScannedAt {
-                Text("Varrido \(Format.date(at))").zenData(12, color: Zen.gray5)
+                Text(L("Scanned %@", Format.date(at))).zenData(12, color: Zen.gray5)
             }
         }
     }
 
     private func table(_ groups: [CleanupGroup]) -> some View {
         TableCard {
-            TableHeader(columns: [("Regra", nil), ("Itens", 80), ("Tamanho", 100)], leading: 30)
+            TableHeader(columns: [(L("Rule"), nil), (L("Items"), 80), (L("Size"), 100)], leading: 30)
             ForEach(Array(groups.enumerated()), id: \.element.id) { i, group in
                 GroupRow(group: group)
                 if model.expandedGroups.contains(group.id) {
@@ -85,10 +86,10 @@ private struct GroupRow: View {
                 .buttonStyle(.plain).frame(width: 18)
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 10) {
-                    Text(group.rule.title).font(Zen.font(14, .bold)).foregroundStyle(Zen.gray9)
-                    if group.rule.risk == .medium { DotBadge(text: "Revise", color: Zen.gray5) }
+                    Text(group.rule.displayTitle).font(Zen.font(14, .bold)).foregroundStyle(Zen.gray9)
+                    if group.rule.risk == .medium { DotBadge(text: L("Review [badge]"), color: Zen.gray5) }
                 }
-                Text(group.rule.why).zenData(12, color: Zen.gray6).lineLimit(2)
+                Text(group.rule.displayWhy).zenData(12, color: Zen.gray6).lineLimit(2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Text(Format.count(group.items.count)).zenData().frame(width: 80, alignment: .trailing)
@@ -123,7 +124,7 @@ private struct ItemRow: View {
                 Text(Format.path(item.path)).zenData(12, color: Zen.gray5).lineLimit(1).truncationMode(.middle)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            IconButton(icon: "external-link", help: "Mostrar no Finder") {
+            IconButton(icon: "external-link", help: L("Show in Finder")) {
                 NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: item.path)])
             }
             Text(Format.bytes(item.size)).zenData().frame(width: 100, alignment: .trailing)

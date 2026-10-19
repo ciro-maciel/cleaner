@@ -72,7 +72,7 @@ enum SelfTest {
         let lockedResult = lockedQ.move([(locked, 1)], reason: "Autoteste EPERM")
         let lockedTime = Date().timeIntervalSince(lockedStart)
         let lockedMessage = lockedResult.failures.first?.message ?? ""
-        let expected = Permissions.hasFullDiskAccess ? "O macOS protege este item" : Quarantine.fullDiskAccessMessage
+        let expected = Permissions.hasFullDiskAccess ? L("macOS protects this item") : Quarantine.fullDiskAccessMessage
         check(lockedResult.batch == nil && FileManager.default.fileExists(atPath: locked) && lockedMessage == expected && lockedTime < 2,
               "a refused move (EPERM) stays in place, says \"\(lockedMessage)\", and asks for no password")
         Privileged.run("/usr/bin/chflags", ["nouchg", locked])

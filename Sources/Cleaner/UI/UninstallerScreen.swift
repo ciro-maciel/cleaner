@@ -7,16 +7,16 @@ struct UninstallerScreen: View {
     var body: some View {
         @Bindable var model = model
         Page {
-            PageHeader(crumb: "Cleaner", title: "Desinstalador",
-                       subtitle: "Arrastar para a Lixeira deixa preferências, caches e contêineres para trás. Marque os apps, revise o que cada um espalhou e tire tudo de uma vez. Volta se você mudar de ideia.") {
+            PageHeader(crumb: "Cleaner", title: L("Uninstaller"),
+                       subtitle: L("Dragging to the Trash leaves preferences, caches and containers behind. Tick the apps, review what each one spread around and remove it all at once. It comes back if you change your mind.")) {
                 SearchField(text: $model.appQuery)
                 Button { Task { await model.loadApps() } } label: {
-                    ButtonLabel(title: model.appsLoading ? "Medindo…" : "Atualizar", icon: "refresh")
+                    ButtonLabel(title: model.appsLoading ? L("Measuring…") : L("Refresh"), icon: "refresh")
                 }
                 .buttonStyle(ZenButtonStyle(kind: .secondary))
                 .disabled(model.appsLoading)
                 Button { Task { await model.prepareUninstall() } } label: {
-                    ButtonLabel(title: model.appSelection.isEmpty ? "Marque os apps" : "Revisar \(Format.plural(model.appSelection.count, "app", "apps"))",
+                    ButtonLabel(title: model.appSelection.isEmpty ? L("Select Apps") : L("Review %@", Format.plural(model.appSelection.count, L("app"), L("apps"))),
                                 icon: "package", color: .white)
                 }
                 .buttonStyle(ZenButtonStyle(kind: .primary))
@@ -27,23 +27,23 @@ struct UninstallerScreen: View {
                 if model.appsLoading {
                     VStack(spacing: 16) {
                         ScanningAnimation(size: 200)
-                        Text("Listando os apps…").zenLabel(11, color: Zen.gray5)
+                        Text(L("Listing apps…")).zenLabel(11, color: Zen.gray5)
                     }.frame(maxWidth: .infinity).padding(.vertical, 56)
                 } else {
-                    EmptyState(illustration: "uninstall", title: "Lista vazia",
-                               subtitle: "Listamos os apps de Aplicativos e da sua pasta de Aplicativos, com o tamanho de cada um.") {
-                        Button { Task { await model.loadApps() } } label: { ButtonLabel(title: "Listar apps", icon: "apps", color: .white) }
+                    EmptyState(illustration: "uninstall", title: L("Empty list"),
+                               subtitle: L("We list the apps in Applications and in your own Applications folder, with the size of each.")) {
+                        Button { Task { await model.loadApps() } } label: { ButtonLabel(title: L("List Apps"), icon: "apps", color: .white) }
                             .buttonStyle(ZenButtonStyle(kind: .primary))
                     }
                 }
             } else {
                 if !model.orphans.isEmpty { OrphanSection().padding(.bottom, 40) }
                 if !model.appSelection.isEmpty {
-                    Text("\(Format.plural(model.appSelection.count, "app marcado", "apps marcados")) · \(Format.bytes(model.selectedAppsBytes)) sem contar os restos")
+                    Text(L("%1$@ · %2$@ not counting leftovers", Format.plural(model.appSelection.count, L("app selected"), L("apps selected")), Format.bytes(model.selectedAppsBytes)))
                         .zenData(13, color: Zen.gray9).padding(.bottom, 12)
                 }
                 list
-                Text("Clique na linha para marcar. Tamanhos medidos no disco. Apps da App Store e do sistema pedem a senha de administrador para sair. O macOS e o Safari não aparecem: são parte do sistema.")
+                Text(L("Click a row to tick it. Sizes measured on disk. App Store and system apps ask for the administrator password to be removed. macOS and Safari are not listed: they are part of the system."))
                     .zenNote().padding(.top, 16)
             }
         }
@@ -61,12 +61,12 @@ struct UninstallerScreen: View {
                     else { apps.forEach { model.appSelection.insert($0.path) } }
                 } label: { CheckBox(state: state) }
                 .buttonStyle(.plain)
-                .help(state == .on ? "Desmarcar todos" : "Marcar todos da lista")
+                .help(state == .on ? L("Untick all") : L("Tick all in the list"))
                 Color.clear.frame(width: 28, height: 1)
-                Text("App").zenLabel(10, color: Zen.gray5).frame(maxWidth: .infinity, alignment: .leading)
-                Text("Versão").zenLabel(10, color: Zen.gray5).frame(width: 110, alignment: .trailing)
-                Text("Último uso").zenLabel(10, color: Zen.gray5).frame(width: 110, alignment: .trailing)
-                Text("Tamanho").zenLabel(10, color: Zen.gray5).frame(width: 100, alignment: .trailing)
+                Text(L("App")).zenLabel(10, color: Zen.gray5).frame(maxWidth: .infinity, alignment: .leading)
+                Text(L("Version")).zenLabel(10, color: Zen.gray5).frame(width: 110, alignment: .trailing)
+                Text(L("Last Used")).zenLabel(10, color: Zen.gray5).frame(width: 110, alignment: .trailing)
+                Text(L("Size")).zenLabel(10, color: Zen.gray5).frame(width: 100, alignment: .trailing)
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
@@ -75,8 +75,8 @@ struct UninstallerScreen: View {
 
             if apps.isEmpty {
                 VStack(spacing: 8) {
-                    Text("Nenhum resultado para «\(model.appQuery)»").zenLabel(10)
-                    Button("Limpar busca") { model.appQuery = "" }.buttonStyle(ZenButtonStyle(kind: .subtle, height: 30))
+                    Text(L("No results for “%@”", model.appQuery)).zenLabel(10)
+                    Button(L("Clear Search")) { model.appQuery = "" }.buttonStyle(ZenButtonStyle(kind: .subtle, height: 30))
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 40)
             }
@@ -127,7 +127,7 @@ struct SearchField: View {
     var body: some View {
         HStack(spacing: 8) {
             Icon(name: "search", size: 16, color: Zen.gray5)
-            TextField("Buscar app", text: $text)
+            TextField(L("Search apps"), text: $text)
                 .textFieldStyle(.plain)
                 .font(Zen.font(13, .medium))
                 .foregroundStyle(Zen.gray9)
@@ -151,27 +151,27 @@ struct UninstallSheet: View {
                     Image(nsImage: AppIcon.image( app.path)).resizable().frame(width: 48, height: 48)
                 }
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Desinstalar").zenLabel(10)
-                    Text(targets.count == 1 ? targets[0].name : "\(targets.count) apps").zenDisplay(28).lineLimit(1)
-                    Text(targets.count == 1 ? "\(targets[0].bundleID)\(targets[0].version.isEmpty ? "" : " · versão \(targets[0].version)")"
+                    Text(L("Uninstall")).zenLabel(10)
+                    Text(targets.count == 1 ? targets[0].name : L("%@ apps", Format.count(targets.count))).zenDisplay(28).lineLimit(1)
+                    Text(targets.count == 1 ? targets[0].bundleID + (targets[0].version.isEmpty ? "" : L(" · version %@", targets[0].version))
                                             : targets.map(\.name).joined(separator: ", "))
                         .zenData(12, color: Zen.gray5).lineLimit(2)
                 }
                 Spacer()
-                IconButton(icon: "x", help: "Fechar") { model.closeUninstall() }
+                IconButton(icon: "x", help: L("Close")) { model.closeUninstall() }
             }
             .padding(32)
 
             let open = model.runningTargets
             if !open.isEmpty {
-                Banner(icon: "alert-triangle", title: open.count == 1 ? "\(open[0].name) está aberto" : "\(open.count) apps estão abertos",
-                       text: "Feche antes de desinstalar, senão o app recria os arquivos na hora.") {
-                    Button("Encerrar") { model.quitRunningTargets() }.buttonStyle(ZenButtonStyle(kind: .secondary, height: 30))
+                Banner(icon: "alert-triangle", title: open.count == 1 ? L("%@ is open", open[0].name) : L("%@ apps are open", Format.count(open.count)),
+                       text: L("Quit it before uninstalling, or the app recreates the files right away.")) {
+                    Button(L("Quit")) { model.quitRunningTargets() }.buttonStyle(ZenButtonStyle(kind: .secondary, height: 30))
                 }
                 .padding(.horizontal, 32).padding(.bottom, 16)
             }
 
-            Text("O que sai").zenLabel(10, color: Zen.gray5).padding(.horizontal, 32).padding(.bottom, 8)
+            Text(L("What gets removed")).zenLabel(10, color: Zen.gray5).padding(.horizontal, 32).padding(.bottom, 8)
             ScrollView {
                 VStack(spacing: 0) {
                     ForEach(Array(targets.enumerated()), id: \.element.id) { i, app in
@@ -186,17 +186,17 @@ struct UninstallSheet: View {
 
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Total").zenLabel(10, color: Zen.gray5)
+                    Text(L("Total")).zenLabel(10, color: Zen.gray5)
                     Text(Format.bytes(model.uninstallBytes)).zenDisplay(24)
                 }
                 Spacer()
                 if model.uninstalling {
                     HStack(spacing: 10) {
                         ProgressView().controlSize(.small)
-                        Text("Movendo para a quarentena…").zenData(12, color: Zen.gray6)
+                        Text(L("Moving to the quarantine…")).zenData(12, color: Zen.gray6)
                     }
                 } else {
-                    HoldButton(title: targets.count == 1 ? "Desinstalar" : "Desinstalar \(targets.count) apps", icon: "trash") {
+                    HoldButton(title: targets.count == 1 ? L("Uninstall") : L("Uninstall %@ apps", Format.count(targets.count)), icon: "trash") {
                         Task { await model.uninstall() }
                     }
                     .disabled(model.leftoversLoading)
@@ -214,18 +214,18 @@ struct UninstallSheet: View {
     @ViewBuilder
     private func appBlock(_ app: InstalledApp) -> some View {
         let multi = model.uninstallTargets.count > 1
-        line(icon: "package", title: multi ? app.name : "O app", path: app.path, size: app.size ?? 0, locked: true, on: true,
+        line(icon: "package", title: multi ? app.name : L("The app"), path: app.path, size: app.size ?? 0, locked: true, on: true,
              appIcon: multi ? app.path : nil) {}
         if model.leftoversLoading {
             RowDivider()
             HStack(spacing: 10) {
                 ProgressView().controlSize(.small)
-                Text("Procurando o que o app deixou…").zenData(12, color: Zen.gray5)
+                Text(L("Looking for what the app left…")).zenData(12, color: Zen.gray5)
             }
             .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20).padding(.vertical, 12)
         } else if (model.leftovers[app.path] ?? []).isEmpty {
             RowDivider()
-            Text("Nenhum resto encontrado nas pastas da Biblioteca\(model.hasFullDiskAccess ? "" : " (com o Acesso Total ao Disco desligado, parte delas fica oculta)").")
+            Text(L("No leftovers found in the Library folders%@.", model.hasFullDiskAccess ? "" : L(" (with Full Disk Access off, some of them are hidden)")))
                 .zenData(12, color: Zen.gray5)
                 .frame(maxWidth: .infinity, alignment: .leading).padding(.leading, 50).padding(.trailing, 20).padding(.vertical, 10)
         }
@@ -233,7 +233,7 @@ struct UninstallSheet: View {
             RowDivider()
             line(icon: left.system ? "lock" : "folder", title: left.kind, path: left.path, size: left.size,
                  locked: false, on: model.leftoverSelection.contains(left.path), appIcon: nil,
-                 note: left.protected && !model.hasFullDiskAccess ? "Precisa do Acesso Total ao Disco" : nil) {
+                 note: left.protected && !model.hasFullDiskAccess ? L("Needs Full Disk Access") : nil) {
                 if model.leftoverSelection.contains(left.path) { model.leftoverSelection.remove(left.path) }
                 else { model.leftoverSelection.insert(left.path) }
             }
@@ -276,15 +276,15 @@ struct OrphanSection: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Restos de apps que já saíram").zenLabel(10, color: Zen.gray5)
-                    Text("Apps que não estão mais no disco, mas deixaram arquivos ou um ícone com ? no Dock.")
+                    Text(L("Leftovers of removed apps")).zenLabel(10, color: Zen.gray5)
+                    Text(L("Apps no longer on disk that left files behind or a ? icon in the Dock."))
                         .zenData(12, color: Zen.gray6)
                 }
                 Spacer()
                 if model.orphansCleaning {
-                    HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Limpando…").zenData(12, color: Zen.gray6) }
+                    HStack(spacing: 8) { ProgressView().controlSize(.small); Text(L("Cleaning…")).zenData(12, color: Zen.gray6) }
                 } else {
-                    HoldButton(title: model.orphanSelection.isEmpty ? "Nada marcado" : "Limpar restos", icon: "trash", kind: .secondary) {
+                    HoldButton(title: model.orphanSelection.isEmpty ? L("Nothing Selected") : L("Clear Leftovers"), icon: "trash", kind: .secondary) {
                         Task { await model.cleanOrphans() }
                     }
                     .disabled(model.orphanSelection.isEmpty)
@@ -306,12 +306,12 @@ struct OrphanSection: View {
                     .background(Zen.gray1)
                     if orphan.inDock {
                         RowDivider()
-                        row(key: orphan.dockKey, icon: "apps", title: "Ícone no Dock", detail: "\(Format.path(orphan.path)) não existe mais", size: nil, note: nil)
+                        row(key: orphan.dockKey, icon: "apps", title: L("Dock icon"), detail: L("%@ no longer exists", Format.path(orphan.path)), size: nil, note: nil)
                     }
                     ForEach(orphan.leftovers) { left in
                         RowDivider()
                         row(key: left.path, icon: left.system ? "lock" : "folder", title: left.kind, detail: Format.path(left.path), size: left.size,
-                            note: left.protected && !model.hasFullDiskAccess ? "Precisa do Acesso Total ao Disco" : nil)
+                            note: left.protected && !model.hasFullDiskAccess ? L("Needs Full Disk Access") : nil)
                     }
                 }
             }

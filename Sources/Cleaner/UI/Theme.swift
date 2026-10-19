@@ -226,19 +226,19 @@ struct HoldButton: View {
     @State private var hintToken = 0
     @Environment(\.isEnabled) private var enabled
 
-    private var hint: String { "Segure \(Int(duration)) s" }
+    private var hint: String { L("Hold %@ s", String(Int(duration))) }
 
     var body: some View {
         let fg: Color = kind == .primary ? .white : (kind == .danger ? Zen.red7 : Zen.gray9)
         TimelineView(.animation(minimumInterval: 1 / 30, paused: pressedAt == nil)) { context in
             let progress = pressedAt.map { min(1, context.date.timeIntervalSince($0) / duration) } ?? 0
             let left = max(1, Int(ceil(duration * (1 - progress))))
-            let shown = pressedAt != nil ? "Segure… \(left)" : (hinting || previewHint ? hint : title)
+            let shown = pressedAt != nil ? L("Hold… %@", String(left)) : (hinting || previewHint ? hint : title)
             HStack(spacing: 8) {
                 if let icon { Icon(name: icon, size: 14, color: fg) }
                 // Every text the button can show sits in the same slot, so its width never jumps.
                 ZStack(alignment: .center) {
-                    ForEach([title, hint, "Segure… \(Int(duration))"], id: \.self) { Text($0).hidden() }
+                    ForEach([title, hint, L("Hold… %@", String(Int(duration)))], id: \.self) { Text($0).hidden() }
                     Text(shown)
                 }
             }
@@ -273,8 +273,8 @@ struct HoldButton: View {
                 if Date().timeIntervalSince(started) < duration { showHint() }
             }
         }
-        .help("Segure por \(Int(duration)) segundos para confirmar. Solte para cancelar.")
-        .accessibilityHint("Segure por \(Int(duration)) segundos para confirmar")
+        .help(L("Hold for %@ seconds to confirm. Let go to cancel.", String(Int(duration))))
+        .accessibilityHint(Text(L("Hold for %@ seconds to confirm", String(Int(duration)))))
     }
 
     private func showHint() {
@@ -320,10 +320,10 @@ struct Logotype: View {
                 LogotypeBolt()
                     .frame(width: height * 0.8 * 320 / 420, height: height * 0.8)
                 VStack(alignment: .leading, spacing: signatureSize * 0.35) {
-                    Text("Cleaner")
+                    Text(verbatim: "Cleaner")
                         .font(Zen.font(wordSize, .extraBold)).tracking(-0.02 * wordSize)
                         .foregroundStyle(Zen.gray9)
-                    Text("by Ciro Cesar Maciel")
+                    Text(verbatim: "by Ciro Cesar Maciel")
                         .font(Zen.font(signatureSize, .bold)).tracking(0.01 * signatureSize)
                         .foregroundStyle(Zen.gray6)
                 }
@@ -333,9 +333,9 @@ struct Logotype: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Cleaner by Ciro Cesar Maciel. Mais ferramentas em ciromaciel.click")
+        .help(L("Cleaner by Ciro Cesar Maciel. More tools at ciromaciel.click"))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Cleaner by Ciro Cesar Maciel")
+        .accessibilityLabel(Text(verbatim: "Cleaner by Ciro Cesar Maciel"))
         .accessibilityAddTraits(.isLink)
     }
 }

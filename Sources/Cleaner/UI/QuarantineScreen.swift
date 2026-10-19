@@ -7,28 +7,28 @@ struct QuarantineScreen: View {
 
     var body: some View {
         Page {
-            PageHeader(crumb: "Cleaner", title: "Quarentena",
-                       subtitle: "Tudo o que o Cleaner tira do lugar fica aqui por 7 dias, com o caminho de onde veio. Devolva com um clique; depois do prazo, some de vez.") {
+            PageHeader(crumb: "Cleaner", title: L("Quarantine"),
+                       subtitle: L("Everything Cleaner moves stays here for 7 days, with the path it came from. Restore it with one click; after that, it is gone for good.")) {
                 if !model.batches.isEmpty {
-                    HoldButton(title: "Esvaziar agora", icon: "trash", kind: .danger) { model.purgeAll() }
+                    HoldButton(title: L("Empty Now"), icon: "trash", kind: .danger) { model.purgeAll() }
                 }
             }
 
             if model.purgingBytes > 0 {
                 HStack(spacing: 10) {
                     ProgressView().controlSize(.small)
-                    Text("Apagando \(Format.bytes(model.purgingBytes)) em segundo plano. Pode continuar usando o Cleaner.")
+                    Text(L("Deleting %@ in the background. You can keep using Cleaner.", Format.bytes(model.purgingBytes)))
                         .zenData(13, color: Zen.gray9)
                 }
                 .padding(.bottom, 24)
             }
             if model.batches.isEmpty {
-                EmptyState(illustration: "quarantine", title: "Quarentena vazia",
-                           subtitle: "Quando você limpar, desinstalar ou tirar algo pelo Mapa do disco, os itens esperam aqui 7 dias antes de sumir.")
+                EmptyState(illustration: "quarantine", title: L("Quarantine is empty"),
+                           subtitle: L("When you clean up, uninstall or remove something from the Disk Map, the items wait here 7 days before they are gone."))
             } else {
                 HStack(alignment: .bottom) {
-                    BigMetric(label: "Guardado", bytes: model.quarantineBytes,
-                              note: "Em \(Format.plural(model.batches.count, "lote", "lotes")). Esse espaço volta para o disco quando cada lote vence ou quando você esvazia.",
+                    BigMetric(label: L("Kept"), bytes: model.quarantineBytes,
+                              note: L("In %@. This space goes back to the disk when each batch expires or when you empty it.", Format.plural(model.batches.count, L("batch"), L("batches"))),
                               size: 72)
                     Spacer()
                     Illustration(name: "quarantine", size: 150)
@@ -36,7 +36,7 @@ struct QuarantineScreen: View {
                 .padding(.bottom, 32)
 
                 TableCard {
-                    TableHeader(columns: [("Lote", nil), ("Itens", 70), ("Tamanho", 100), ("Some em", 100), ("", 196)])
+                    TableHeader(columns: [(L("Batch"), nil), (L("Items"), 70), (L("Size"), 100), (L("Gone in"), 100), ("", 196)])
                     ForEach(Array(model.batches.enumerated()), id: \.element.id) { i, batch in
                         BatchRow(batch: batch, expanded: expanded.contains(batch.id)) {
                             if expanded.contains(batch.id) { expanded.remove(batch.id) } else { expanded.insert(batch.id) }
@@ -50,7 +50,7 @@ struct QuarantineScreen: View {
                         if i < model.batches.count - 1 { RowDivider() }
                     }
                 }
-                Text("Esvaziar apaga de vez e não tem volta: segure 3 segundos. Lotes vencidos são apagados quando o Cleaner abre.")
+                Text(L("Emptying deletes for good and cannot be undone: hold for 3 seconds. Expired batches are deleted when Cleaner opens."))
                     .zenNote().padding(.top, 16)
             }
         }
@@ -76,9 +76,9 @@ private struct BatchRow: View {
             Text(Format.bytes(batch.size)).font(Zen.font(13, .bold)).foregroundStyle(Zen.gray9).frame(width: 100, alignment: .trailing)
             Text(daysLeft).zenData().frame(width: 100, alignment: .trailing)
             HStack(spacing: 8) {
-                Button { Task { await model.restore(batch) } } label: { ButtonLabel(title: "Devolver", icon: "arrow-back-up") }
+                Button { Task { await model.restore(batch) } } label: { ButtonLabel(title: L("Restore"), icon: "arrow-back-up") }
                     .buttonStyle(ZenButtonStyle(kind: .secondary, height: 30))
-                HoldButton(title: "Apagar", icon: nil, kind: .danger, height: 30) { model.purge(batch) }
+                HoldButton(title: L("Delete"), icon: nil, kind: .danger, height: 30) { model.purge(batch) }
             }
             .frame(width: 196, alignment: .trailing)
         }
@@ -91,9 +91,9 @@ private struct BatchRow: View {
 
     private var daysLeft: String {
         let left = batch.expiresAt.timeIntervalSinceNow / 86_400
-        if left < 1 { return "hoje" }
+        if left < 1 { return L("today") }
         let d = Int(left.rounded(.up))
-        return d == 1 ? "1 dia" : "\(d) dias"
+        return d == 1 ? L("1 day") : L("%@ days", Format.count(d))
     }
 }
 
@@ -107,15 +107,15 @@ private struct QuarantineItemRow: View {
             Color.clear.frame(width: 14)
             VStack(alignment: .leading, spacing: 2) {
                 Text((item.original as NSString).lastPathComponent).zenData(13, color: Zen.gray9).lineLimit(1)
-                Text("veio de \(Format.path((item.original as NSString).deletingLastPathComponent))").zenData(12, color: Zen.gray5)
+                Text(L("from %@", Format.path((item.original as NSString).deletingLastPathComponent))).zenData(12, color: Zen.gray5)
                     .lineLimit(1).truncationMode(.middle)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Text(Format.bytes(item.size)).zenData().frame(width: 100, alignment: .trailing)
-            IconButton(icon: "external-link", help: "Mostrar no Finder") {
+            IconButton(icon: "external-link", help: L("Show in Finder")) {
                 NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: item.stored)])
             }
-            IconButton(icon: "arrow-back-up", help: "Devolver este item") { Task { await model.restore(batch, item: item) } }
+            IconButton(icon: "arrow-back-up", help: L("Restore this item")) { Task { await model.restore(batch, item: item) } }
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 8)

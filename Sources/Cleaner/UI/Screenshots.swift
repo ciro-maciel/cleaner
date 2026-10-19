@@ -69,6 +69,8 @@ enum Screenshots {
         try? await Task.sleep(for: .milliseconds(800))
         save(host, to: dir.appendingPathComponent("9-menubar-panel.png"))
         host.orderOut(nil)
+        // With the menu bar item on, a plain quit only hides the window: a capture run must end.
+        AppDelegate.allowQuit = true
         NSApp.terminate(nil)
     }
 

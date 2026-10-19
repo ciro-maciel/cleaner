@@ -33,7 +33,7 @@ final class Quarantine: @unchecked Sendable {
         var needsFullDiskAccess: [String] = []
     }
 
-    static let fullDiskAccessMessage = "Falta ligar o Acesso Total ao Disco para o Cleaner"
+    static let fullDiskAccessMessage = L("Full Disk Access is off for Cleaner")
 
     let root: URL
     private let fm = FileManager.default
@@ -118,7 +118,7 @@ final class Quarantine: @unchecked Sendable {
                 // EPERM: privacy protection (Trash, Mail, app containers) or SIP. A password
                 // would not help, so it is never asked for this.
                 if Permissions.hasFullDiskAccess {
-                    result.failures.append((entry.path, "O macOS protege este item"))
+                    result.failures.append((entry.path, L("macOS protects this item")))
                 } else {
                     result.needsFullDiskAccess.append(entry.path)
                     result.failures.append((entry.path, Self.fullDiskAccessMessage))
@@ -134,7 +134,7 @@ final class Quarantine: @unchecked Sendable {
             let user = NSUserName()
             let command = (adminPrelude.map { "(\($0)) || true" } + needAdmin.map { "/bin/mv \(Privileged.quoted($0.0)) \(Privileged.quoted($0.1)) && /usr/sbin/chown -R \(Privileged.quoted(user)) \(Privileged.quoted($0.1))" }).joined(separator: " && ")
             do {
-                try Privileged.asAdmin(command, prompt: Self.adminPrompt("mover", needAdmin.map(\.0), "para a quarentena"))
+                try Privileged.asAdmin(command, prompt: Self.adminPrompt(restoring: false, needAdmin.map(\.0)))
                 for (path, stored, size) in needAdmin { batch.items.append(Item(original: path, stored: stored, size: size)) }
             } catch {
                 // Some may have moved before the failure: keep what landed.
@@ -158,10 +158,17 @@ final class Quarantine: @unchecked Sendable {
 
     /// What the password prompt says: the action, how many items and the first of them, so
     /// the person knows what the password is for.
-    static func adminPrompt(_ verb: String, _ paths: [String], _ rest: String) -> String {
+    static func adminPrompt(restoring: Bool, _ paths: [String]) -> String {
         let first = (paths.first ?? "").replacingOccurrences(of: NSHomeDirectory(), with: "~")
-        let what = paths.count == 1 ? "1 item do sistema (\(first))" : "\(paths.count) itens do sistema, como \(first),"
-        return "O Cleaner precisa da senha de administrador para \(verb) \(what) \(rest). Eles ficam fora da sua pasta e pertencem ao sistema."
+        if paths.count == 1 {
+            return restoring
+                ? L("Cleaner needs the administrator password to put 1 system item (%@) back where it was. It lives outside your home folder and belongs to the system.", first)
+                : L("Cleaner needs the administrator password to move 1 system item (%@) to the quarantine. It lives outside your home folder and belongs to the system.", first)
+        }
+        let n = Format.count(paths.count)
+        return restoring
+            ? L("Cleaner needs the administrator password to put %1$@ system items, such as %2$@, back where they were. They live outside your home folder and belong to the system.", n, first)
+            : L("Cleaner needs the administrator password to move %1$@ system items, such as %2$@, to the quarantine. They live outside your home folder and belong to the system.", n, first)
     }
 
     /// EPERM: privacy protection or SIP. Not solved by the administrator password.
@@ -190,7 +197,7 @@ final class Quarantine: @unchecked Sendable {
     // MARK: restoring
 
     /// Puts items back where they were. If something now sits at the original path, the item
-    /// comes back next to it with " (restaurado)" in the name.
+    /// comes back next to it with " (restored)" (" (restaurado)" in Portuguese) in the name.
     func restore(batchID: String, items only: Set<String>? = nil) throws -> Int {
         let dir = root.appendingPathComponent(batchID)
         guard var batch = load(dir) else { return 0 }
@@ -205,7 +212,7 @@ final class Quarantine: @unchecked Sendable {
                 let ns = target as NSString
                 let ext = ns.pathExtension
                 let base = ext.isEmpty ? target : ns.deletingPathExtension
-                target = base + " (restaurado)" + (ext.isEmpty ? "" : "." + ext)
+                target = base + L(" (restored)") + (ext.isEmpty ? "" : "." + ext)
             }
             try? fm.createDirectory(atPath: (target as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
             do {
@@ -213,7 +220,7 @@ final class Quarantine: @unchecked Sendable {
                 batch.items[i].restored = true
                 restored += 1
             } catch let error as NSError where Self.isPrivacyBlock(error) {
-                errors.append(Permissions.hasFullDiskAccess ? "O macOS protege \((target as NSString).lastPathComponent)" : Self.fullDiskAccessMessage)
+                errors.append(Permissions.hasFullDiskAccess ? L("macOS protects %@", (target as NSString).lastPathComponent) : Self.fullDiskAccessMessage)
             } catch let error as NSError where Self.isPermission(error) {
                 needAdmin.append((i, item.stored, target))
             } catch {
@@ -224,7 +231,7 @@ final class Quarantine: @unchecked Sendable {
         if !needAdmin.isEmpty {
             let command = needAdmin.map { "/bin/mv \(Privileged.quoted($0.1)) \(Privileged.quoted($0.2))" }.joined(separator: " && ")
             do {
-                try Privileged.asAdmin(command, prompt: Self.adminPrompt("devolver", needAdmin.map(\.2), "ao lugar de origem"))
+                try Privileged.asAdmin(command, prompt: Self.adminPrompt(restoring: true, needAdmin.map(\.2)))
             } catch { errors.append(error.localizedDescription) }
             for (i, _, target) in needAdmin where fm.fileExists(atPath: target) {
                 batch.items[i].restored = true
@@ -265,7 +272,7 @@ final class Quarantine: @unchecked Sendable {
             // rm walks big trees faster than FileManager and never blocks the app.
             if Privileged.run("/bin/rm", ["-rf", dir.path]).status != 0, fm.fileExists(atPath: dir.path) {
                 // Files the user cannot delete (should not happen: moved items are chowned).
-                try? Privileged.asAdmin("/bin/rm -rf \(Privileged.quoted(dir.path))", prompt: "O Cleaner precisa da senha de administrador para apagar de vez um lote da quarentena com itens do sistema.")
+                try? Privileged.asAdmin("/bin/rm -rf \(Privileged.quoted(dir.path))", prompt: L("Cleaner needs the administrator password to permanently delete a quarantine batch with system items."))
             }
         }
     }

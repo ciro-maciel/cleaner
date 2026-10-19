@@ -86,7 +86,7 @@ enum Background {
         let others = app.pids.filter { !mine.contains($0) }
         if !others.isEmpty {
             try Privileged.asAdmin("/bin/kill " + others.map(String.init).joined(separator: " "),
-                                   prompt: "O Cleaner precisa da senha de administrador para encerrar \(app.name), que roda como sistema.")
+                                   prompt: L("Cleaner needs the administrator password to quit %@, which runs as the system.", app.name))
         }
         Thread.sleep(forTimeInterval: 1)
         let left = Set(processes().map(\.pid)).intersection(mine)

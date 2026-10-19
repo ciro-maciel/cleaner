@@ -82,7 +82,7 @@ struct FreeMemoryButton: View {
             if monitor.freeingMemory {
                 HStack(spacing: 6) {
                     ProgressView().controlSize(.mini)
-                    Text("Liberando…").zenData(11, color: Zen.gray6)
+                    Text(L("Freeing…")).zenData(11, color: Zen.gray6)
                 }
                 .frame(height: 26)
             } else if let note = monitor.helperNote, Helper.state == .needsApproval {
@@ -94,17 +94,17 @@ struct FreeMemoryButton: View {
                 }
                 .buttonStyle(.plain)
                 .frame(height: 26)
-                .help("Em Ajustes → Geral → Itens de início, ligue o Cleaner em Permitir em segundo plano. Depois disso, Liberar não pede senha.")
+                .help(L("In System Settings → General → Login Items, turn on Cleaner under Allow in the Background. After that, Free Up asks for no password."))
             } else if let freed = monitor.recentlyFreed {
                 HStack(spacing: 6) {
                     Icon(name: "check", size: 13, color: Zen.gray9)
-                    Text("\(Format.bytes(freed)) livres a mais").font(Zen.font(11, .bold)).foregroundStyle(Zen.gray9)
+                    Text(L("%@ more free", Format.bytes(freed))).font(Zen.font(11, .bold)).foregroundStyle(Zen.gray9)
                 }
                 .frame(height: 26)
             } else {
-                Button { Task { await monitor.freeMemory() } } label: { ButtonLabel(title: "Liberar", icon: "sparkles") }
+                Button { Task { await monitor.freeMemory() } } label: { ButtonLabel(title: L("Free Up"), icon: "sparkles") }
                     .buttonStyle(ZenButtonStyle(kind: .secondary, height: 26))
-                    .help("Esvazia o cache de arquivos que o macOS guarda na memória (comando purge), pelo ajudante do Cleaner, sem senha.")
+                    .help(L("Empties the file cache macOS keeps in memory (the purge command), through Cleaner's helper, with no password."))
             }
         }
     }

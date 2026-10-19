@@ -6,23 +6,23 @@ struct DiskMapScreen: View {
 
     var body: some View {
         Page {
-            PageHeader(crumb: "Cleaner", title: "Mapa do disco",
-                       subtitle: "Cada pasta pelo tamanho que ocupa de verdade. Entre nas maiores, marque o que não serve mais e mande tudo para a quarentena de uma vez.") {
-                Button { choose() } label: { ButtonLabel(title: "Outra pasta", icon: "folder-open") }
+            PageHeader(crumb: "Cleaner", title: L("Disk Map"),
+                       subtitle: L("Every folder by the space it really takes. Go into the biggest ones, tick what you no longer need and send it all to the quarantine at once.")) {
+                Button { choose() } label: { ButtonLabel(title: L("Other Folder"), icon: "folder-open") }
                     .buttonStyle(ZenButtonStyle(kind: .secondary))
                     .disabled(model.diskScanning)
                 Button { Task { await model.scanDisk() } } label: {
-                    ButtonLabel(title: model.diskScanning ? "Medindo…" : (model.diskIndex == nil ? "Medir" : "Medir de novo"), icon: "scan")
+                    ButtonLabel(title: model.diskScanning ? L("Measuring…") : (model.diskIndex == nil ? L("Measure") : L("Measure Again")), icon: "scan")
                 }
                 .buttonStyle(ZenButtonStyle(kind: .secondary))
                 .disabled(model.diskScanning)
                 if model.diskIndex != nil && !model.diskScanning {
                     if model.diskMoving {
-                        HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Movendo…").zenData(12, color: Zen.gray6) }
+                        HStack(spacing: 8) { ProgressView().controlSize(.small); Text(L("Moving…")).zenData(12, color: Zen.gray6) }
                             .frame(height: 36)
                     } else {
                         let picked = model.diskSelectedEntries
-                        HoldButton(title: picked.isEmpty ? "Nada marcado" : "Mover \(Format.bytes(picked.reduce(0) { $0 + $1.size }))", icon: "trash") {
+                        HoldButton(title: picked.isEmpty ? L("Nothing Selected") : L("Move %@", Format.bytes(picked.reduce(0) { $0 + $1.size })), icon: "trash") {
                             Task { await model.moveDiskSelection() }
                         }
                         .disabled(picked.isEmpty)
@@ -33,16 +33,16 @@ struct DiskMapScreen: View {
             if model.diskScanning {
                 VStack(spacing: 16) {
                     ScanningAnimation(size: 200)
-                    Text("\(Format.count(model.diskFilesSeen)) arquivos lidos").zenLabel(11, color: Zen.gray5)
+                    Text(L("%@ files read", Format.count(model.diskFilesSeen))).zenLabel(11, color: Zen.gray5)
                     Text(displayName(model.diskRoot)).zenData(12, color: Zen.gray5)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 56)
             } else if model.diskIndex != nil {
                 content
             } else {
-                EmptyState(illustration: "diskmap", title: "Comece pela sua pasta pessoal",
-                           subtitle: "A medição lê \(Format.path(NSHomeDirectory())) inteira, em paralelo. Num Mac cheio leva um ou dois minutos.") {
-                    Button { Task { await model.scanDisk() } } label: { ButtonLabel(title: "Medir agora", icon: "scan", color: .white) }
+                EmptyState(illustration: "diskmap", title: L("Start with your home folder"),
+                           subtitle: L("The measurement reads all of %@, in parallel. On a full Mac it takes a minute or two.", Format.path(NSHomeDirectory()))) {
+                    Button { Task { await model.scanDisk() } } label: { ButtonLabel(title: L("Measure Now"), icon: "scan", color: .white) }
                         .buttonStyle(ZenButtonStyle(kind: .primary))
                 }
             }
@@ -57,12 +57,12 @@ struct DiskMapScreen: View {
         return VStack(alignment: .leading, spacing: 0) {
             if path != model.diskRoot { breadcrumb.padding(.bottom, 24) }
             BigMetric(label: displayName(path), bytes: total,
-                      note: "\(Format.plural(entries.count, "item", "itens")) nesta pasta. Medido em blocos ocupados; arquivos clonados do APFS contam inteiros em cada cópia.",
+                      note: L("%@ in this folder. Measured in blocks used; APFS clones count in full in each copy.", Format.plural(entries.count, L("item"), L("items"))),
                       size: 72)
                 .padding(.bottom, 32)
             if !model.diskSelection.isEmpty {
                 let picked = entries.filter { model.diskSelection.contains($0.path) }
-                Text("\(Format.plural(picked.count, "item marcado", "itens marcados")) · \(Format.bytes(picked.reduce(0) { $0 + $1.size })) · segure o botão Mover por 3 segundos")
+                Text(L("%1$@ · %2$@ · hold the Move button for 3 seconds", Format.plural(picked.count, L("item selected"), L("items selected")), Format.bytes(picked.reduce(0) { $0 + $1.size })))
                     .zenData(13, color: Zen.gray9).padding(.bottom, 12)
             }
             TableCard {
@@ -72,10 +72,11 @@ struct DiskMapScreen: View {
                     if i < min(entries.count, 300) - 1 { RowDivider() }
                 }
             }
-            Text("Clique numa pasta para entrar; a caixa marca. O que sai fica 7 dias na Quarentena e volta com um clique; o espaço só volta ao disco quando ela esvazia.")
+            Text(L("Click a folder to go in; the box ticks it. What is removed stays 7 days in the Quarantine and comes back with one click; the space returns to the disk only when it is emptied."))
                 .zenNote().padding(.top, 16)
             if let denied = model.diskIndex?.denied, denied > 0 {
-                Text("\(Format.plural(denied, "pasta não pôde", "pastas não puderam")) ser lidas por falta de permissão\(model.hasFullDiskAccess ? "" : ". Ligue o Acesso Total ao Disco para medir tudo").")
+                Text(L("%1$@ read for lack of permission%2$@.", Format.plural(denied, L("folder could not be"), L("folders could not be")),
+                        model.hasFullDiskAccess ? "" : L(". Turn on Full Disk Access to measure everything")))
                     .zenNote().padding(.top, 16)
             }
         }
@@ -91,11 +92,11 @@ struct DiskMapScreen: View {
                 else { shown.forEach { model.diskSelection.insert($0.path) } }
             } label: { CheckBox(state: state) }
             .buttonStyle(.plain)
-            .help(state == .on ? "Desmarcar todos" : "Marcar todos desta pasta")
+            .help(state == .on ? L("Untick all") : L("Tick all in this folder"))
             Color.clear.frame(width: 16, height: 1)
-            Text("Nome").zenLabel(10, color: Zen.gray5).frame(maxWidth: .infinity, alignment: .leading)
-            Text("Parte").zenLabel(10, color: Zen.gray5).frame(width: 220, alignment: .leading)
-            Text("Tamanho").zenLabel(10, color: Zen.gray5).frame(width: 100, alignment: .trailing)
+            Text(L("Name")).zenLabel(10, color: Zen.gray5).frame(maxWidth: .infinity, alignment: .leading)
+            Text(L("Share")).zenLabel(10, color: Zen.gray5).frame(width: 220, alignment: .leading)
+            Text(L("Size")).zenLabel(10, color: Zen.gray5).frame(width: 100, alignment: .trailing)
             Color.clear.frame(width: 28, height: 1)
         }
         .padding(.horizontal, 24)
@@ -112,7 +113,7 @@ struct DiskMapScreen: View {
         for part in rel { acc = (acc as NSString).appendingPathComponent(part); paths.append((acc, part)) }
         return HStack(spacing: 6) {
             if paths.count > 1 {
-                IconButton(icon: "arrow-left", help: "Voltar uma pasta") { model.openDiskFolder(paths[paths.count - 2].0) }
+                IconButton(icon: "arrow-left", help: L("Up one folder")) { model.openDiskFolder(paths[paths.count - 2].0) }
             }
             ForEach(Array(paths.enumerated()), id: \.offset) { i, p in
                 if i > 0 { Icon(name: "chevron-right", size: 12, color: Zen.gray4) }
@@ -125,14 +126,14 @@ struct DiskMapScreen: View {
     }
 
     private func displayName(_ path: String) -> String {
-        path == NSHomeDirectory() ? "Pasta pessoal" : (path as NSString).lastPathComponent
+        path == NSHomeDirectory() ? L("Home folder") : (path as NSString).lastPathComponent
     }
 
     private func choose() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
-        panel.prompt = "Medir"
+        panel.prompt = L("Measure")
         panel.directoryURL = URL(fileURLWithPath: model.diskRoot)
         if panel.runModal() == .OK, let url = panel.url { Task { await model.scanDisk(root: url.path) } }
     }
@@ -158,7 +159,7 @@ private struct DiskRow: View {
             }
             .frame(width: 220)
             Text(Format.bytes(entry.size)).font(Zen.font(13, .bold)).foregroundStyle(Zen.gray9).frame(width: 100, alignment: .trailing)
-            IconButton(icon: "external-link", help: "Mostrar no Finder") {
+            IconButton(icon: "external-link", help: L("Show in Finder")) {
                 NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: entry.path)])
             }
         }

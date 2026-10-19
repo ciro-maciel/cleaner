@@ -101,7 +101,9 @@ enum Startup {
         } else {
             let script = commands.map { "/bin/launchctl " + $0.map(Privileged.quoted).joined(separator: " ") + " || true" }
                 .joined(separator: "; ")
-            try Privileged.asAdmin(script, prompt: "O Cleaner precisa da senha de administrador para \(enabled ? "ligar" : "desligar") \(item.label), que é um item de inicialização do sistema.")
+            try Privileged.asAdmin(script, prompt: enabled
+                ? L("Cleaner needs the administrator password to turn on %@, which is a system startup item.", item.label)
+                : L("Cleaner needs the administrator password to turn off %@, which is a system startup item.", item.label))
         }
     }
 }

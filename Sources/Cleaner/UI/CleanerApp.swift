@@ -18,10 +18,10 @@ struct CleanerApp: App {
         Settings { EmptyView() }
             .commands {
                 CommandGroup(replacing: .newItem) {
-                    Button("Janela do Cleaner") { MainWindow.show() }.keyboardShortcut("0")
+                    Button(L("Cleaner Window")) { MainWindow.show() }.keyboardShortcut("0")
                 }
-                CommandMenu("Varredura") {
-                    Button("Varrer o Mac") { Task { await AppModel.shared.scanEverything() } }.keyboardShortcut("r")
+                CommandMenu(L("Scan")) {
+                    Button(L("Scan Your Mac")) { Task { await AppModel.shared.scanEverything() } }.keyboardShortcut("r")
                 }
             }
     }
@@ -245,8 +245,8 @@ struct Sidebar: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
 
-            group("Ferramentas", Screen.tools).padding(.bottom, 24)
-            group("Ajustes", Screen.settingsGroup)
+            group(L("Tools"), Screen.tools).padding(.bottom, 24)
+            group(L("Settings"), Screen.settingsGroup)
 
             Spacer()
 
@@ -257,14 +257,14 @@ struct Sidebar: View {
                 } label: {
                     HStack(spacing: 8) {
                         Icon(name: model.hasFullDiskAccess ? "check" : "lock", size: 14, color: model.hasFullDiskAccess ? Zen.gray6 : Zen.red7)
-                        Text(model.hasFullDiskAccess ? "Acesso Total ao Disco ligado" : "Acesso Total ao Disco desligado")
+                        Text(model.hasFullDiskAccess ? L("Full Disk Access on") : L("Full Disk Access off"))
                             .zenData(12, color: model.hasFullDiskAccess ? Zen.gray6 : Zen.red7)
                     }
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .help(model.hasFullDiskAccess ? "Ver as permissões" : "Abrir a lista do Acesso Total ao Disco nos Ajustes do Sistema")
-                Text("Versão \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev")")
+                .help(model.hasFullDiskAccess ? L("See the permissions") : L("Open the Full Disk Access list in System Settings"))
+                Text(L("Version %@", Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"))
                     .zenData(12, color: Zen.gray5)
             }
             .padding(24)

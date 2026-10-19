@@ -8,14 +8,14 @@ enum Screen: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .overview: return "Visão geral"
-        case .monitor: return "Monitor"
-        case .cleanup: return "Limpeza"
-        case .uninstaller: return "Desinstalador"
-        case .diskmap: return "Mapa do disco"
-        case .startup: return "Segundo plano"
-        case .quarantine: return "Quarentena"
-        case .settings: return "Geral"
+        case .overview: return L("Overview")
+        case .monitor: return L("Monitor")
+        case .cleanup: return L("Cleanup")
+        case .uninstaller: return L("Uninstaller")
+        case .diskmap: return L("Disk Map")
+        case .startup: return L("Background")
+        case .quarantine: return L("Quarantine")
+        case .settings: return L("General")
         }
     }
 
@@ -113,12 +113,12 @@ final class AppModel {
     }
 
     /// A move left items in place because Full Disk Access is off: say which permission, in
-    /// Portuguese, and open the screen whose button leads to the switch (15-app-mac.md). Never
+    /// the interface language, and open the screen whose button leads to the switch (15-app-mac.md). Never
     /// a password prompt: the password does not unlock what macOS keeps behind privacy.
     func pointToFullDiskAccess(_ count: Int) {
         hasFullDiskAccess = Permissions.hasFullDiskAccess
         screen = .settings
-        show("\(Quarantine.fullDiskAccessMessage): \(Format.plural(count, "item ficou", "itens ficaram")) no lugar. Ligue em Ajustes.", error: true)
+        show(L("%1$@: %2$@ in place. Turn it on in Settings.", Quarantine.fullDiskAccessMessage, Format.plural(count, L("item stayed"), L("items stayed"))), error: true)
     }
 
     func show(_ text: String, error: Bool = false) {
@@ -180,7 +180,7 @@ final class AppModel {
         let entries = groups.flatMap(\.items).filter { cleanupSelection.contains($0.path) }.map { ($0.path, $0.size) }
         guard !entries.isEmpty else { return }
         let q = quarantine
-        let result = await Task.detached { q.move(entries, reason: "Limpeza") }.value
+        let result = await Task.detached { q.move(entries, reason: L("Cleanup")) }.value
         let moved = Set(result.batch?.items.map(\.original) ?? [])
         cleanupGroups = groups.map { g in
             var g = g; g.items.removeAll { moved.contains($0.path) }; return g
@@ -191,9 +191,9 @@ final class AppModel {
         if !result.needsFullDiskAccess.isEmpty {
             pointToFullDiskAccess(result.needsFullDiskAccess.count)
         } else if result.failures.isEmpty {
-            show("\(Format.bytes(bytes)) na quarentena. Dá para desfazer por 7 dias.")
+            show(L("%@ in the quarantine. You can undo it for 7 days.", Format.bytes(bytes)))
         } else {
-            show("\(Format.bytes(bytes)) na quarentena; \(Format.plural(result.failures.count, "item não saiu", "itens não saíram")) do lugar.", error: true)
+            show(L("%1$@ in the quarantine; %2$@.", Format.bytes(bytes), Format.plural(result.failures.count, L("item could not be moved"), L("items could not be moved"))), error: true)
         }
     }
 
@@ -283,7 +283,7 @@ final class AppModel {
         guard !targets.isEmpty, !uninstalling else { return }
         let open = runningTargets
         if !open.isEmpty {
-            show("Feche antes: \(open.map(\.name).joined(separator: ", ")).", error: true)
+            show(L("Quit first: %@.", open.map(\.name).joined(separator: ", ")), error: true)
             return
         }
         uninstalling = true
@@ -296,7 +296,7 @@ final class AppModel {
             }
         }
         let names = targets.map(\.name)
-        let reason = names.count == 1 ? "Desinstalar \(names[0])" : "Desinstalar \(names.count) apps: \(names.joined(separator: ", "))"
+        let reason = names.count == 1 ? L("Uninstall %@", names[0]) : L("Uninstall %1$@ apps: %2$@", String(names.count), names.joined(separator: ", "))
         let q = quarantine
         let appPaths = targets.map(\.path)
         let files = entries.filter { !appPaths.contains($0.0) }
@@ -317,21 +317,22 @@ final class AppModel {
         let containersBlocked = stayed.contains { $0.contains("/Library/Containers/") || $0.contains("/Library/Group Containers/") } && !hasFullDiskAccess
         if gone.count == targets.count {
             closeUninstall()
-            let what = gone.count == 1 ? "\(gone[0].name) desinstalado" : "\(gone.count) apps desinstalados"
+            let what = gone.count == 1 ? L("%@ uninstalled", gone[0].name) : L("%@ apps uninstalled", String(gone.count))
             if !report.needsFullDiskAccess.isEmpty {
                 pointToFullDiskAccess(report.needsFullDiskAccess.count)
             } else if stayed.isEmpty {
                 var extras: [String] = []
-                if report.dockTiles > 0 { extras.append("fora do Dock") }
-                if report.stoppedProcesses > 0 { extras.append(Format.plural(report.stoppedProcesses, "processo parado", "processos parados")) }
-                show("\(what) por completo: \(Format.bytes(report.batch?.size ?? 0)) na quarentena\(extras.isEmpty ? "" : ", " + extras.joined(separator: ", ")).")
+                if report.dockTiles > 0 { extras.append(L("removed from the Dock")) }
+                if report.stoppedProcesses > 0 { extras.append(Format.plural(report.stoppedProcesses, L("process stopped"), L("processes stopped"))) }
+                show(L("%1$@ completely: %2$@ in the quarantine%3$@.", what, Format.bytes(report.batch?.size ?? 0), extras.isEmpty ? "" : ", " + extras.joined(separator: ", ")))
             } else {
-                show("\(what), mas \(Format.plural(stayed.count, "resto ficou", "restos ficaram"))\(containersBlocked ? ": ligue o Acesso Total ao Disco e use Restos de apps" : ". Veja em Restos de apps").", error: true)
+                show(L("%1$@, but %2$@%3$@.", what, Format.plural(stayed.count, L("leftover stayed"), L("leftovers stayed")),
+                       containersBlocked ? L(": turn on Full Disk Access and use Leftovers of removed apps") : L(". See Leftovers of removed apps")), error: true)
             }
         } else {
             uninstallTargets = targets.filter { !moved.contains($0.path) }
-            let why = report.failures.first?.message ?? "sem detalhe do sistema"
-            show("\(Format.plural(targets.count - gone.count, "app não saiu", "apps não saíram")): \(why)", error: true)
+            let why = report.failures.first?.message ?? L("no detail from the system")
+            show("\(Format.plural(targets.count - gone.count, L("app was not removed"), L("apps were not removed"))): \(why)", error: true)
         }
         await loadOrphans()
     }
@@ -388,7 +389,7 @@ final class AppModel {
         let q = quarantine
         let entries = chosen.map { ($0.path, $0.size) }
         let report = await Task.detached {
-            Uninstaller.run(apps: [], files: entries, dockPaths: dockPaths, quarantine: q, reason: "Restos de \(names.joined(separator: ", "))")
+            Uninstaller.run(apps: [], files: entries, dockPaths: dockPaths, quarantine: q, reason: L("Leftovers of %@", names.joined(separator: ", ")))
         }.value
         let result = (batch: report.batch, failures: report.failures)
         orphansCleaning = false
@@ -396,12 +397,14 @@ final class AppModel {
         await loadOrphans()
         let stayed = chosen.filter { FileManager.default.fileExists(atPath: $0.path) }
         if stayed.isEmpty {
-            show("Restos limpos: \(Format.bytes(result.batch?.size ?? 0)) na quarentena\(dockPaths.isEmpty ? "" : ", \(Format.plural(dockPaths.count, "ícone saiu", "ícones saíram")) do Dock").")
+            show(L("Leftovers cleared: %1$@ in the quarantine%2$@.", Format.bytes(result.batch?.size ?? 0),
+                   dockPaths.isEmpty ? "" : L(", %@ from the Dock", Format.plural(dockPaths.count, L("icon removed"), L("icons removed")))))
         } else if !report.needsFullDiskAccess.isEmpty {
             pointToFullDiskAccess(report.needsFullDiskAccess.count)
         } else {
             let blocked = stayed.contains { $0.protected } && !hasFullDiskAccess
-            show("\(Format.plural(stayed.count, "resto não saiu", "restos não saíram"))\(blocked ? ": o macOS protege os contêineres; ligue o Acesso Total ao Disco" : ": \(result.failures.first?.message ?? "sem detalhe")").", error: true)
+            show(Format.plural(stayed.count, L("leftover could not be removed"), L("leftovers could not be removed"))
+                 + (blocked ? L(": macOS protects the containers; turn on Full Disk Access") : ": " + (result.failures.first?.message ?? L("no detail"))) + ".", error: true)
         }
     }
 
@@ -490,7 +493,7 @@ final class AppModel {
         diskMoving = true
         let q = quarantine
         let list = chosen.map { ($0.path, $0.size) }
-        let reason = chosen.count == 1 ? "Mapa do disco: \(chosen[0].name)" : "Mapa do disco: \(chosen.count) itens de \((diskPath as NSString).lastPathComponent)"
+        let reason = chosen.count == 1 ? L("Disk Map: %@", chosen[0].name) : L("Disk Map: %1$@ items from %2$@", String(chosen.count), (diskPath as NSString).lastPathComponent)
         let result = await Task.detached { q.move(list, reason: reason) }.value
         if let index = diskIndex, let batch = result.batch {
             for item in batch.items {
@@ -508,9 +511,9 @@ final class AppModel {
         if !result.needsFullDiskAccess.isEmpty {
             pointToFullDiskAccess(result.needsFullDiskAccess.count)
         } else if result.failures.isEmpty {
-            show("\(Format.plural(moved.count, "item", "itens")) na quarentena (\(Format.bytes(bytes))). O espaço volta quando ela esvaziar.")
+            show(L("%1$@ in the quarantine (%2$@). The space comes back when it is emptied.", Format.plural(moved.count, L("item"), L("items")), Format.bytes(bytes)))
         } else {
-            show("\(Format.plural(moved.count, "item saiu", "itens saíram")); \(Format.plural(result.failures.count, "não saiu", "não saíram")): \(result.failures[0].message)", error: true)
+            show("\(Format.plural(moved.count, L("item moved"), L("items moved"))); \(Format.plural(result.failures.count, L("was not moved"), L("were not moved"))): \(result.failures[0].message)", error: true)
         }
     }
 
@@ -538,7 +541,7 @@ final class AppModel {
         do {
             try await Task.detached { try Background.quit(app) }.value
             let restarts = app.startupItems.contains { !$0.disabled }
-            show(restarts ? "\(app.name) encerrado. Ele abre sozinho de novo: use Impedir de abrir." : "\(app.name) encerrado.")
+            show(restarts ? L("%@ quit. It will open on its own again: use Block.", app.name) : L("%@ quit.", app.name))
         } catch {
             show(error.localizedDescription, error: true)
         }
@@ -555,7 +558,7 @@ final class AppModel {
         }
         if failed == nil { try? await Task.detached { try Background.quit(app) }.value }
         backgroundBusy.remove(app.id)
-        if let failed { show(failed, error: true) } else { show("\(app.name) não abre mais sozinho. Dá para religar em Abrem sozinhos.") }
+        if let failed { show(failed, error: true) } else { show(L("%@ no longer opens on its own. You can turn it back on under Start automatically.", app.name)) }
         await loadStartup()
     }
 
@@ -565,7 +568,7 @@ final class AppModel {
             if AppCatalog.isRunning(installed) == nil { try? await Task.detached { try Background.quit(app) }.value }
             await prepareUninstall([installed])
         } else {
-            show("\(app.name) faz parte de outro app ou do sistema; desinstale pelo app principal.", error: true)
+            show(L("%@ is part of another app or of the system; uninstall it through the main app.", app.name), error: true)
         }
     }
 
@@ -574,13 +577,13 @@ final class AppModel {
         let q = quarantine
         let size = DiskUsage.size(of: item.plist)
         let report = await Task.detached {
-            Uninstaller.run(apps: [], files: [(item.plist, size)], dockPaths: [], quarantine: q, reason: "Item de inicialização: \(item.label)")
+            Uninstaller.run(apps: [], files: [(item.plist, size)], dockPaths: [], quarantine: q, reason: L("Startup item: %@", item.label))
         }.value
         refreshBasics()
         if report.stayed.isEmpty {
-            show("\(item.label) excluído: parado agora e guardado 7 dias na Quarentena.")
+            show(L("%@ deleted: stopped now and kept 7 days in the Quarantine.", item.label))
         } else {
-            show(report.failures.first?.message ?? "Não deu para excluir \(item.label).", error: true)
+            show(report.failures.first?.message ?? L("Could not delete %@.", item.label), error: true)
         }
         await loadStartup()
     }
@@ -588,7 +591,7 @@ final class AppModel {
     func setStartup(_ item: StartupItem, enabled: Bool) async {
         do {
             try await Task.detached { try Startup.setEnabled(item, enabled) }.value
-            show(enabled ? "\(item.label) ligado." : "\(item.label) desligado. Dá para religar aqui mesmo.")
+            show(enabled ? L("%@ turned on.", item.label) : L("%@ turned off. You can turn it back on right here.", item.label))
         } catch {
             show(error.localizedDescription, error: true)
         }
@@ -604,7 +607,7 @@ final class AppModel {
         let only = item.map { Set([$0.stored]) }
         do {
             let n = try await Task.detached { try q.restore(batchID: batch.id, items: only) }.value
-            show(n == 1 ? "1 item devolvido ao lugar." : "\(n) itens devolvidos ao lugar.")
+            show(n == 1 ? L("1 item restored to its place.") : L("%@ items restored to their places.", Format.count(n)))
         } catch where error.localizedDescription == Quarantine.fullDiskAccessMessage {
             pointToFullDiskAccess(1)
         } catch {
@@ -612,7 +615,8 @@ final class AppModel {
         }
         refreshBasics()
         // Restored apps and caches show up again in their screens.
-        if batch.reason.hasPrefix("Desinstalar") { await loadApps() }
+        // The reason is written in the language of the day it was made: both prefixes count.
+        if ["Desinstalar", "Uninstall"].contains(where: batch.reason.hasPrefix) { await loadApps() }
     }
 
     /// Bytes on their way out: staged batches the background is deleting.
@@ -620,7 +624,7 @@ final class AppModel {
     private var purgeRunning = false
 
     func purge(_ batch: Quarantine.Batch) {
-        guard quarantine.stage(batchID: batch.id) else { show("Não deu para apagar este lote.", error: true); return }
+        guard quarantine.stage(batchID: batch.id) else { show(L("Could not delete this batch."), error: true); return }
         refreshBasics()
         Task { await finishPurging(announce: true) }
     }
@@ -637,13 +641,13 @@ final class AppModel {
         guard !purgeRunning, purgingBytes > 0 else { return }
         purgeRunning = true
         let total = purgingBytes
-        if announce { show("Apagando \(Format.bytes(total)) em segundo plano. Pode continuar usando o Cleaner.") }
+        if announce { show(L("Deleting %@ in the background. You can keep using Cleaner.", Format.bytes(total))) }
         let q = quarantine
         await Task.detached(priority: .utility) { q.finishPurges() }.value
         purgeRunning = false
         purgingBytes = quarantine.purgingBytes()
         refreshBasics()
-        if announce { show("\(Format.bytes(total)) apagados de vez e devolvidos ao disco.") }
+        if announce { show(L("%@ deleted for good and given back to the disk.", Format.bytes(total))) }
         // Something staged while this ran gets its own pass.
         if purgingBytes > 0 { await finishPurging(announce: announce) }
     }

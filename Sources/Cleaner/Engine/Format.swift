@@ -1,10 +1,11 @@
 import Foundation
 
-/// Byte and date formatting in pt-BR, decimal units like Finder (1 GB = 1000³ bytes).
+/// Byte and date formatting in the interface language (L10n.locale), decimal units like Finder
+/// (1 GB = 1000³ bytes). "MB" and the other units read the same in both languages.
 enum Format {
     private static let number: NumberFormatter = {
         let f = NumberFormatter()
-        f.locale = Locale(identifier: "pt_BR")
+        f.locale = L10n.locale
         f.numberStyle = .decimal
         f.minimumFractionDigits = 0
         return f
@@ -39,8 +40,9 @@ enum Format {
 
     private static let dayFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "pt_BR")
-        f.dateFormat = "d 'de' MMM, HH:mm"
+        f.locale = L10n.locale
+        // Portuguese keeps its reviewed "12 de out., 14:30"; English asks the locale ("Oct 12, 2:30 PM").
+        if L10n.isPortuguese { f.dateFormat = "d 'de' MMM, HH:mm" } else { f.setLocalizedDateFormatFromTemplate("MMMdjmm") }
         return f
     }()
 
@@ -49,11 +51,11 @@ enum Format {
     static func relative(_ date: Date) -> String {
         let days = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
         switch days {
-        case ..<1: return "hoje"
-        case 1: return "ontem"
-        case 2..<60: return "há \(days) dias"
-        case 60..<730: return "há \(days / 30) meses"
-        default: return "há \(days / 365) anos"
+        case ..<1: return L("today")
+        case 1: return L("yesterday")
+        case 2..<60: return L("%@ days ago", String(days))
+        case 60..<730: return L("%@ months ago", String(days / 30))
+        default: return L("%@ years ago", String(days / 365))
         }
     }
 

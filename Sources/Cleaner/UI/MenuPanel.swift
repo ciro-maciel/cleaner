@@ -14,32 +14,32 @@ struct MenuPanel: View {
             HStack(alignment: .center) {
                 Logotype(height: 36, source: "oss-cleaner-menubar")
                 Spacer()
-                Text("ligado há \(Format.uptime(s.uptime))").zenData(11, color: Zen.gray5)
+                Text(L("up for %@", Format.uptime(s.uptime))).zenData(11, color: Zen.gray5)
             }
             .padding(.horizontal, 20).padding(.top, 18).padding(.bottom, 14)
 
             RowDivider()
-            row(icon: "cpu", label: "Processador", value: Format.percent(s.cpu.total),
-                detail: "Usuário \(Format.percent(s.cpu.user)) · sistema \(Format.percent(s.cpu.system))") {
+            row(icon: "cpu", label: L("CPU"), value: Format.percent(s.cpu.total),
+                detail: L("User %1$@ · system %2$@", Format.percent(s.cpu.user), Format.percent(s.cpu.system))) {
                 Sparkline(values: monitor.cpu, capacity: cap, height: 26)
             }
             RowDivider()
-            row(icon: "stack-2", label: "Memória", value: Format.percent(Double(s.memory.used) / Double(max(s.memory.total, 1))),
-                detail: "\(Format.bytes(s.memory.used)) de \(Format.bytes(s.memory.total)) · livre \(Format.bytes(s.memory.free))",
+            row(icon: "stack-2", label: L("Memory"), value: Format.percent(Double(s.memory.used) / Double(max(s.memory.total, 1))),
+                detail: L("%1$@ of %2$@ · free %3$@", Format.bytes(s.memory.used), Format.bytes(s.memory.total), Format.bytes(s.memory.free)),
                 alert: s.memory.pressure >= 4, trailing: AnyView(FreeMemoryButton())) {
                 Sparkline(values: monitor.memory, capacity: cap, height: 26)
             }
             RowDivider()
-            row(icon: "arrows-down-up", label: "Rede", value: Format.rate(s.network.inPerSec),
-                detail: "Enviando \(Format.rate(s.network.outPerSec))\(s.network.interface.isEmpty ? "" : " · \(s.network.interface)")") {
+            row(icon: "arrows-down-up", label: L("Network"), value: Format.rate(s.network.inPerSec),
+                detail: L("Uploading %@", Format.rate(s.network.outPerSec)) + (s.network.interface.isEmpty ? "" : " · \(s.network.interface)")) {
                 Sparkline(values: monitor.netIn, second: monitor.netOut, ceiling: nil, capacity: cap, height: 26)
             }
             RowDivider()
-            row(icon: "device-sd-card", label: "Disco", value: "\(Format.bytes(s.disk.free)) livres",
-                detail: "Lendo \(Format.rate(s.disk.readPerSec)) · gravando \(Format.rate(s.disk.writePerSec))") { EmptyView() }
+            row(icon: "device-sd-card", label: L("Disk"), value: L("%@ free", Format.bytes(s.disk.free)),
+                detail: L("Reading %1$@ · writing %2$@", Format.rate(s.disk.readPerSec), Format.rate(s.disk.writePerSec))) { EmptyView() }
             if let b = s.battery {
                 RowDivider()
-                row(icon: b.charging ? "battery-charging" : "battery", label: "Bateria", value: "\(b.percent)%",
+                row(icon: b.charging ? "battery-charging" : "battery", label: L("Battery"), value: "\(b.percent)%",
                     detail: MonitorScreen.batteryLines(b).first ?? "", alert: !b.onAC && b.percent <= 10) {
                     ShareBar(fraction: Double(b.percent) / 100, height: 6)
                 }
@@ -49,7 +49,7 @@ struct MenuPanel: View {
             if !top.isEmpty {
                 RowDivider()
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Mais processador").zenLabel(9, color: Zen.gray5)
+                    Text(L("Top CPU")).zenLabel(9, color: Zen.gray5)
                     ForEach(top) { p in
                         HStack(spacing: 8) {
                             Text(NSRunningApplication(processIdentifier: p.pid)?.localizedName ?? p.name)
@@ -66,25 +66,25 @@ struct MenuPanel: View {
                 RowDivider()
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Dá para liberar").zenLabel(9, color: Zen.gray5)
+                        Text(L("Can be freed")).zenLabel(9, color: Zen.gray5)
                         Text(Format.bytes(model.cleanupTotal)).font(Zen.font(18, .black)).foregroundStyle(Zen.gray9)
                     }
                     Spacer()
-                    Button { open(.cleanup) } label: { ButtonLabel(title: "Revisar", icon: "sparkles") }
+                    Button { open(.cleanup) } label: { ButtonLabel(title: L("Review"), icon: "sparkles") }
                         .buttonStyle(ZenButtonStyle(kind: .secondary, height: 30))
                 }
                 .padding(.horizontal, 20).padding(.vertical, 12)
             }
 
             HStack(spacing: 8) {
-                Button { open(.monitor) } label: { ButtonLabel(title: "Abrir o Cleaner", icon: "app-window", color: .white) }
+                Button { open(.monitor) } label: { ButtonLabel(title: L("Open Cleaner"), icon: "app-window", color: .white) }
                     .buttonStyle(ZenButtonStyle(kind: .primary, height: 30))
                 Spacer()
-                HoldButton(title: "Sair", icon: "power", kind: .secondary, height: 30) {
+                HoldButton(title: L("Quit [app]"), icon: "power", kind: .secondary, height: 30) {
                     AppDelegate.allowQuit = true
                     NSApp.terminate(nil)
                 }
-                .help("Segure 3 segundos para fechar o Cleaner de vez. ⌘Q só esconde a janela.")
+                .help(L("Hold 3 seconds to quit Cleaner for good. ⌘Q only hides the window."))
             }
             .padding(.horizontal, 20).padding(.vertical, 14)
             .background(Zen.gray1)
