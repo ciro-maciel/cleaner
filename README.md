@@ -2,6 +2,8 @@
 
 **A Mac cleaner that shows you everything before it deletes anything.**
 
+One of [six free, open-source Mac apps](#more-from-ciro-cesar-maciel) by [Ciro Cesar Maciel](https://ciromaciel.click/?ref=oss-cleaner).
+
 Every rule it cleans by is in one readable file, [`rules.json`](rules.json). Nothing is deleted on the spot: whatever you remove waits 7 days in a quarantine and goes back where it was with one click. A native Swift app for macOS 14+ on Apple Silicon, with no network code at all.
 
 [Português](README.pt-BR.md)
@@ -107,6 +109,19 @@ Issues and pull requests are welcome, especially for `rules.json`. See [CONTRIBU
 
 ---
 
-Made by [Ciro Cesar Maciel](https://ciromaciel.click/?ref=oss-cleaner). I build tools and show how to use them: more [free tools](https://ciromaciel.click/tools?ref=oss-cleaner) and [Mac apps](https://ciromaciel.click/tools/cleaner?ref=oss-cleaner).
+## More from Ciro Cesar Maciel
 
-**Want the next one?** [Follow @ciro-maciel](https://github.com/ciro-maciel) for the next open-source tools, and click **Watch → Custom → Releases** above to hear about every new Cleaner rule.
+I build software on my own, with a team of AI agents, and open what I can. These are six native Mac apps, all free, MIT, signed and notarized by Apple, in English and Brazilian Portuguese:
+
+| App | What it does |
+| --- | --- |
+| [Cleaner](https://github.com/ciro-maciel/cleaner) | The Mac cleaner that shows you everything before it deletes anything · **this one** |
+| [Screenshots](https://github.com/ciro-maciel/screenshots) | Capture, annotate and record the screen, with nothing leaving your Mac |
+| [Speech to Text](https://github.com/ciro-maciel/speech-to-text) | Dictation by shortcut, with Whisper running on your Mac |
+| [Assistant](https://github.com/ciro-maciel/voice-assistant) | Claude Code by voice: say its name, ask, hear the answer |
+| [Windows](https://github.com/ciro-maciel/windows) | Snap windows into place with a shortcut or by dragging them to the edge |
+| [Text to Speech](https://github.com/ciro-maciel/text-to-speech) | Select text in any app and hear it read aloud |
+
+Beyond the apps: [free tools for the browser](https://ciromaciel.click/tools?ref=oss-cleaner), [books](https://ciromaciel.click/books?ref=oss-cleaner), and [Infrastructure](https://myinfrastructure.click/?ref=oss-cleaner), the infrastructure AI agents already know how to run.
+
+**Follow along.** [Follow @ciro-maciel](https://github.com/ciro-maciel) for the next open-source apps, click **Watch → Custom → Releases** above for every new version, and see how it is all made on [YouTube](https://www.youtube.com/@ciro-maciel) and at [ciromaciel.click](https://ciromaciel.click/?ref=oss-cleaner).
