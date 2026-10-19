@@ -16,11 +16,7 @@ curl -fsSL https://blob.ciromaciel.click/tools/cleaner/install.sh | bash
 
 The script downloads the latest `.dmg`, copies Cleaner to `/Applications` and opens it.
 
-Prefer the disk image? [Download Cleaner-macos.dmg](https://blob.ciromaciel.click/tools/cleaner/latest/Cleaner-macos.dmg). Cleaner is not notarized by Apple yet, so a browser download is blocked the first time. Clear the flag once:
-
-```bash
-xattr -dr com.apple.quarantine /Applications/Cleaner.app
-```
+Prefer the disk image? [Download Cleaner-macos.dmg](https://blob.ciromaciel.click/tools/cleaner/latest/Cleaner-macos.dmg). Open it and drag Cleaner to Applications. It is signed with Developer ID and notarized by Apple, so macOS opens it with no warning.
 
 For a complete scan, turn on Cleaner in **System Settings → Privacy & Security → Full Disk Access**. Without it, macOS hides the Trash, Mail and app containers, and Cleaner tells you so instead of pretending.
 
@@ -82,7 +78,7 @@ open dist/Cleaner.app
 
 The illustrations on each screen come from a licensed gallery and ship only in the official build; a build from this repository draws the Tabler icon of each screen instead. To use your own, drop 560 × 560 PNGs into `Resources/Illustrations`.
 
-`scripts/signing-identity.sh` creates a local signing certificate once. With it, Full Disk Access survives each rebuild; without it, the build is signed ad hoc and macOS asks again every time.
+`scripts/build.sh` signs with a Developer ID Application certificate when your keychain has one (the official build does). Otherwise `scripts/signing-identity.sh` creates a local signing certificate once: with it, Full Disk Access survives each rebuild; without it, the build is signed ad hoc and macOS asks again every time.
 
 Tests run against your own Mac without changing it:
 
@@ -96,7 +92,6 @@ dist/Cleaner.app/Contents/MacOS/Cleaner --screenshots /tmp/shots        # captur
 
 - Apple Silicon and macOS 14 or newer only.
 - The interface is in Portuguese for now.
-- Not notarized yet, so a downloaded `.dmg` needs the `xattr` line above.
 - Items protected by System Integrity Protection stay where they are. That is macOS working as intended.
 - No duplicate finder, no malware scan and no app updater.
 

@@ -16,11 +16,7 @@ curl -fsSL https://blob.ciromaciel.click/tools/cleaner/install.sh | bash
 
 O script baixa o `.dmg` mais recente, copia o Cleaner para `/Applications` e abre o app.
 
-Prefere a imagem de disco? [Baixe o Cleaner-macos.dmg](https://blob.ciromaciel.click/tools/cleaner/latest/Cleaner-macos.dmg). O Cleaner ainda não é notarizado pela Apple, então o macOS bloqueia o download pelo navegador na primeira vez. Libere uma vez:
-
-```bash
-xattr -dr com.apple.quarantine /Applications/Cleaner.app
-```
+Prefere a imagem de disco? [Baixe o Cleaner-macos.dmg](https://blob.ciromaciel.click/tools/cleaner/latest/Cleaner-macos.dmg). Abra e arraste o Cleaner para Aplicativos. Ele é assinado com Developer ID e notarizado pela Apple, então o macOS abre sem aviso.
 
 Para a varredura completa, ligue o Cleaner em **Ajustes do Sistema → Privacidade e Segurança → Acesso Total ao Disco**. Sem isso, o macOS esconde a Lixeira, o Mail e os contêineres dos apps, e o Cleaner avisa em vez de fingir que viu tudo.
 
@@ -77,7 +73,7 @@ open dist/Cleaner.app
 
 As ilustrações de cada tela vêm de uma galeria licenciada e só vão no build oficial; compilando a partir deste repositório, cada tela mostra o ícone Tabler no lugar. Para usar as suas, ponha PNGs de 560 × 560 em `Resources/Illustrations`.
 
-O `scripts/signing-identity.sh` cria, uma vez, um certificado local de assinatura. Com ele, o Acesso Total ao Disco continua valendo depois de cada build; sem ele, o build sai com assinatura ad hoc e o macOS pede a permissão de novo toda vez.
+O `scripts/build.sh` assina com um certificado Developer ID Application quando o seu chaveiro tem um (o build oficial tem). Sem ele, o `scripts/signing-identity.sh` cria, uma vez, um certificado local de assinatura: com ele, o Acesso Total ao Disco continua valendo depois de cada build; sem ele, o build sai com assinatura ad hoc e o macOS pede a permissão de novo toda vez.
 
 Os testes rodam no seu Mac sem mudar nada:
 
@@ -99,7 +95,6 @@ dist/Cleaner.app/Contents/MacOS/Cleaner --screenshots /tmp/shots        # captur
 
 - Só Apple Silicon e macOS 14 ou mais novo.
 - A interface está em português.
-- Ainda não é notarizado, então o `.dmg` baixado pede a linha do `xattr` acima.
 - Itens protegidos pelo SIP ficam onde estão. É o macOS funcionando como deve.
 - Não procura duplicados, não faz varredura de malware e não atualiza apps.
 

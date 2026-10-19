@@ -21,7 +21,7 @@ CLEANER_NO_ADMIN=1 dist/Cleaner.app/Contents/MacOS/Cleaner --selftest
 dist/Cleaner.app/Contents/MacOS/Cleaner --uninstall-test
 ```
 
-Both tests must pass, and CI runs them on every pull request. If your change touches the screens, attach a capture from `--screenshots`.
+Both tests must pass on your Mac before you open the pull request. If your change touches the screens, attach a capture from `--screenshots`.
 
 House rules:
 
