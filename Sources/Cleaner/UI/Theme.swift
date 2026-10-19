@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 import CoreText
 
-/// RiLiGar Zen in SwiftUI: ten grays, Montserrat in four weights, radius zero, no shadow,
+/// The Zen design system in SwiftUI: ten grays, Montserrat in four weights, radius zero, no shadow,
 /// 1px rules in gray.2. Values from the Zen design system.
 enum Zen {
     // 03-cor.md: the ramp. 0–3 surface and structure, 4–9 ink.
