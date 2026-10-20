@@ -6,7 +6,7 @@ Um dos [seis apps de Mac grátis e de código aberto](#mais-de-ciro-cesar-maciel
 
 **[Veja o vídeo de 1 minuto](https://youtu.be/Wj9M-mYZjJs)** (em inglês)
 
-[![As seen on Open Source Alternatives](https://www.opensourcealternatives.to/badge-osa.svg)](https://www.opensourcealternatives.to)
+[![As seen on Open Source Alternatives](https://www.opensourcealternatives.to/badge-osa.svg)](https://www.opensourcealternatives.to) [![Cleaner by Ciro Cesar Maciel | AlternativeTo](https://alternativeto.net/static/badges/badge-compact-color.svg)](https://alternativeto.net/software/cleaner-by-ciro-cesar-maciel/about/?utm_source=badge&utm_medium=referral)
 
 Toda regra que ele usa para limpar está num arquivo que dá para ler, o [`rules.json`](rules.json). Nada some na hora: o que você remove passa 7 dias numa quarentena e volta ao lugar com um clique. App nativo em Swift, para macOS 14 ou mais novo com Apple Silicon, sem nenhum código de rede.
 
