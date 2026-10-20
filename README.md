@@ -20,6 +20,8 @@ curl -fsSL https://blob.ciromaciel.click/tools/cleaner/install.sh | bash
 
 The script downloads the latest `.dmg`, copies Cleaner to `/Applications` and opens it.
 
+With [Homebrew](https://github.com/ciro-maciel/homebrew-tap): `brew install --cask ciro-maciel/tap/ciro-cleaner`.
+
 Prefer the disk image? [Download Cleaner-macos.dmg](https://blob.ciromaciel.click/tools/cleaner/latest/Cleaner-macos.dmg). Open it and drag Cleaner to Applications. It is signed with Developer ID and notarized by Apple, so macOS opens it with no warning.
 
 For a complete scan, turn on Cleaner in **System Settings → Privacy & Security → Full Disk Access**. Without it, macOS hides the Trash, Mail and app containers, and Cleaner tells you so instead of pretending.

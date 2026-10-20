@@ -20,6 +20,8 @@ curl -fsSL https://blob.ciromaciel.click/tools/cleaner/install.sh | bash
 
 O script baixa o `.dmg` mais recente, copia o Cleaner para `/Applications` e abre o app.
 
+Com o [Homebrew](https://github.com/ciro-maciel/homebrew-tap): `brew install --cask ciro-maciel/tap/ciro-cleaner`.
+
 Prefere a imagem de disco? [Baixe o Cleaner-macos.dmg](https://blob.ciromaciel.click/tools/cleaner/latest/Cleaner-macos.dmg). Abra e arraste o Cleaner para Aplicativos. Ele é assinado com Developer ID e notarizado pela Apple, então o macOS abre sem aviso.
 
 Para a varredura completa, ligue o Cleaner em **Ajustes do Sistema → Privacidade e Segurança → Acesso Total ao Disco**. Sem isso, o macOS esconde a Lixeira, o Mail e os contêineres dos apps, e o Cleaner avisa em vez de fingir que viu tudo.
