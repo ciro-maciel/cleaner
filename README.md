@@ -6,6 +6,8 @@ One of [six free, open-source Mac apps](#more-from-ciro-cesar-maciel) by [Ciro C
 
 **[Watch the 1-minute video](https://youtu.be/Wj9M-mYZjJs)**
 
+[![As seen on Open Source Alternatives](https://www.opensourcealternatives.to/badge-osa.svg)](https://www.opensourcealternatives.to)
+
 Every rule it cleans by is in one readable file, [`rules.json`](rules.json). Nothing is deleted on the spot: whatever you remove waits 7 days in a quarantine and goes back where it was with one click. A native Swift app for macOS 14+ on Apple Silicon, with no network code at all.
 
 [Português](README.pt-BR.md)

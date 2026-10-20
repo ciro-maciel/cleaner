@@ -6,6 +6,8 @@ Um dos [seis apps de Mac grátis e de código aberto](#mais-de-ciro-cesar-maciel
 
 **[Veja o vídeo de 1 minuto](https://youtu.be/Wj9M-mYZjJs)** (em inglês)
 
+[![As seen on Open Source Alternatives](https://www.opensourcealternatives.to/badge-osa.svg)](https://www.opensourcealternatives.to)
+
 Toda regra que ele usa para limpar está num arquivo que dá para ler, o [`rules.json`](rules.json). Nada some na hora: o que você remove passa 7 dias numa quarentena e volta ao lugar com um clique. App nativo em Swift, para macOS 14 ou mais novo com Apple Silicon, sem nenhum código de rede.
 
 [English](README.md)
