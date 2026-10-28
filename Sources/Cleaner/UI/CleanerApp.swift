@@ -29,10 +29,16 @@ struct CleanerApp: App {
 
 /// The menu bar item: the monitor strip as its image, the panel in a popover.
 @MainActor
-final class StatusItem: NSObject {
+final class StatusItem: NSObject, NSPopoverDelegate {
     static let shared = StatusItem()
     private var item: NSStatusItem?
     private let popover = NSPopover()
+
+    /// Closed, the panel lets go of its views: they would keep following the monitor and keep
+    /// their drawing in memory while nobody sees them. It is made again on the next click.
+    func popoverDidClose(_ notification: Notification) {
+        popover.contentViewController = nil
+    }
 
     func sync() {
         let enabled = UserDefaults.standard.bool(forKey: MonitorSettings.enabledKey)
@@ -58,6 +64,7 @@ final class StatusItem: NSObject {
         guard let button = item?.button else { return }
         if popover.isShown { popover.performClose(nil); return }
         popover.behavior = .transient
+        popover.delegate = self
         // Light like the rest of the app; under a dark menu bar the panel would inherit dark
         // and paint template icons white on white.
         popover.appearance = NSAppearance(named: .aqua)
@@ -85,6 +92,7 @@ enum MainWindow {
     final class Watcher: NSObject, NSWindowDelegate {
         func windowWillClose(_ notification: Notification) {
             if MainWindow.menuBarOn { NSApp.setActivationPolicy(.accessory) }
+            DispatchQueue.main.async { MainWindow.release() }
         }
     }
 
@@ -93,6 +101,16 @@ enum MainWindow {
         window?.orderOut(nil)
         StatusItem.shared.close()
         NSApp.setActivationPolicy(.accessory)
+        release()
+    }
+
+    /// Away, the window is let go of, views and drawing with it: a hidden window keeps both
+    /// (about 100 MB of graphics memory for this one). show() makes it again, where it was.
+    private static func release() {
+        guard let w = window, !w.isVisible else { return }
+        w.delegate = nil
+        w.contentView = nil
+        window = nil
     }
 
     /// With the menu bar item on, Cleaner never shows in the Dock, window open or not (the Ciro,

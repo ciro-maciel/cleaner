@@ -63,6 +63,8 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$ROOT/.build/Cleaner" "$APP/Contents/MacOS/Cleaner"
 cp "$ROOT/.build/CleanerHelper" "$APP/Contents/MacOS/CleanerHelper"
+# The symbols out of the shipped binary: half its size. Crash reports still locate each frame.
+strip -rSTx "$APP"/Contents/MacOS/*
 mkdir -p "$APP/Contents/Library/LaunchDaemons"
 cp "$ROOT/scripts/helper.plist" "$APP/Contents/Library/LaunchDaemons/click.ciromaciel.cleaner.helper.plist"
 sed "s/__VERSION__/$VERSION/g" "$ROOT/scripts/Info.plist" > "$APP/Contents/Info.plist"

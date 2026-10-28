@@ -158,19 +158,16 @@ final class SystemMonitor {
 
     // MARK: menu bar image
 
-    /// The status item is a template image drawn from SwiftUI: label 7 pt over value 11 pt per
-    /// metric, Montserrat, black; macOS tints it for light and dark menu bars.
+    /// The status item is a template image: label 7 pt over value 11 pt per metric,
+    /// Montserrat, black; macOS tints it for light and dark menu bars.
     func renderMenuImage() {
         let enabled = MenuMetric.allCases.filter { UserDefaults.standard.bool(forKey: $0.key) }
             .filter { $0 != .battery || sample.battery != nil }
         guard !enabled.isEmpty else { menuImage = Self.placeholder; StatusItem.shared.setImage(menuImage); return }
-        let renderer = ImageRenderer(content: MenuBarStrip(metrics: enabled, sample: sample))
-        renderer.scale = 2
-        if let image = renderer.nsImage {
-            image.isTemplate = true
-            menuImage = image
-            StatusItem.shared.setImage(image)
-        }
+        let image = MenuBarStrip.image(metrics: enabled, sample: sample)
+        image.isTemplate = true
+        menuImage = image
+        StatusItem.shared.setImage(image)
     }
 
     static let placeholder: NSImage = {
@@ -183,14 +180,8 @@ final class SystemMonitor {
 /// The strip drawn into the menu bar image. Every metric gets a slot as wide as its widest
 /// possible value (measured in the real font), content aligned left, one gap between slots:
 /// the item keeps its size as numbers change and the spacing stays even.
-struct MenuBarStrip: View {
-    let metrics: [MenuMetric]
-    let sample: SystemSample
-
+enum MenuBarStrip {
     static let gap: CGFloat = 10
-    static let labelFont = Zen.font(7, .extraBold)
-    static let valueFont = Zen.font(11, .bold)
-    static let rateFont = Zen.font(8.5, .bold)
     static let arrow: CGFloat = 8
 
     private static func width(_ texts: [String], _ name: String, _ size: CGFloat, tracking: CGFloat = 0) -> CGFloat {
@@ -211,49 +202,75 @@ struct MenuBarStrip: View {
     static let diskSlot = pairWidth(["SSD"], ["999G", "9,9T"])
     static let rateSlot = arrow + 2 + width(["999 KB", "9,9 MB", "999 MB", "999 B"], "Montserrat-Bold", 8.5)
 
-    var body: some View {
-        HStack(spacing: Self.gap) {
-            ForEach(metrics) { m in item(m) }
+    /// The strip as an image, drawn with Core Graphics when macOS displays it. A SwiftUI
+    /// ImageRenderer would cost 117 MB of graphics memory for as long as the app runs.
+    static func image(metrics: [MenuMetric], sample: SystemSample) -> NSImage {
+        let size = NSSize(width: metrics.map(slot).reduce(0, +) + gap * CGFloat(max(metrics.count - 1, 0)), height: 22)
+        return NSImage(size: size, flipped: true) { _ in
+            draw(metrics, sample)
+            return true
         }
-        .foregroundStyle(Color.black)
-        .frame(height: 22)
     }
 
-    @ViewBuilder
-    private func item(_ m: MenuMetric) -> some View {
+    /// Into the current graphics context, flipped, at the strip's own size.
+    static func draw(_ metrics: [MenuMetric], _ sample: SystemSample) {
+        var x: CGFloat = 0
+        for m in metrics {
+            draw(m, sample, at: x)
+            x += slot(m) + gap
+        }
+    }
+
+    private static func slot(_ m: MenuMetric) -> CGFloat {
+        switch m {
+        case .network: return rateSlot
+        case .disk: return diskSlot
+        case .battery: return batterySlot
+        case .cpu, .gpu, .memory: return percentSlot
+        }
+    }
+
+    private static func font(_ name: String, _ size: CGFloat) -> NSFont { NSFont(name: name, size: size) ?? .boldSystemFont(ofSize: size) }
+    private static func lineHeight(_ f: NSFont) -> CGFloat { f.ascender - f.descender + f.leading }
+
+    private static func draw(_ m: MenuMetric, _ sample: SystemSample, at x: CGFloat) {
         switch m {
         case .network:
-            VStack(alignment: .leading, spacing: 0) {
-                rate("arrow-up", sample.network.outPerSec)
-                rate("arrow-down", sample.network.inPerSec)
+            let f = font("Montserrat-Bold", 8.5)
+            let row = max(arrow, lineHeight(f))
+            let top = (22 - row * 2) / 2
+            for (i, (icon, value)) in [("arrow-up", sample.network.outPerSec), ("arrow-down", sample.network.inPerSec)].enumerated() {
+                let y = top + row * CGFloat(i)
+                // A template: black where it has ink, as SwiftUI tints it. The mask is drawn
+                // unflipped, or the up arrow would point down.
+                if let ctx = NSGraphicsContext.current?.cgContext, let img = Icon.image(icon) {
+                    var px = CGRect(x: 0, y: 0, width: arrow * 4, height: arrow * 4)
+                    if let mask = img.cgImage(forProposedRect: &px, context: nil, hints: nil) {
+                        let r = CGRect(x: x, y: y + (row - arrow) / 2, width: arrow, height: arrow)
+                        ctx.saveGState()
+                        ctx.translateBy(x: r.minX, y: r.maxY)
+                        ctx.scaleBy(x: 1, y: -1)
+                        ctx.clip(to: CGRect(origin: .zero, size: r.size), mask: mask)
+                        ctx.setFillColor(NSColor.black.cgColor)
+                        ctx.fill(CGRect(origin: .zero, size: r.size))
+                        ctx.restoreGState()
+                    }
+                }
+                (Format.rate(value, compact: true) as NSString).draw(at: CGPoint(x: x + arrow + 2, y: y + (row - lineHeight(f)) / 2), withAttributes: [.font: f, .foregroundColor: NSColor.black])
             }
-            .frame(width: Self.rateSlot, alignment: .leading)
-        case .disk:
-            pair("SSD", Format.compactBytes(sample.disk.free), width: Self.diskSlot)
-        case .cpu:
-            pair("CPU", "\(Int((sample.cpu.total * 100).rounded()))%", width: Self.percentSlot)
-        case .gpu:
-            pair("GPU", "\(Int(((sample.gpu ?? 0) * 100).rounded()))%", width: Self.percentSlot)
-        case .memory:
-            pair("RAM", "\(Int((Double(sample.memory.used) / Double(max(sample.memory.total, 1)) * 100).rounded()))%", width: Self.percentSlot)
-        case .battery:
-            pair(sample.battery?.charging == true ? "BAT+" : "BAT", "\(sample.battery?.percent ?? 0)%", width: Self.batterySlot)
+        case .disk: pair("SSD", Format.compactBytes(sample.disk.free), at: x)
+        case .cpu: pair("CPU", "\(Int((sample.cpu.total * 100).rounded()))%", at: x)
+        case .gpu: pair("GPU", "\(Int(((sample.gpu ?? 0) * 100).rounded()))%", at: x)
+        case .memory: pair("RAM", "\(Int((Double(sample.memory.used) / Double(max(sample.memory.total, 1)) * 100).rounded()))%", at: x)
+        case .battery: pair(sample.battery?.charging == true ? "BAT+" : "BAT", "\(sample.battery?.percent ?? 0)%", at: x)
         }
     }
 
-    private func rate(_ icon: String, _ value: Int64) -> some View {
-        HStack(spacing: 2) {
-            Icon(name: icon, size: Self.arrow, color: .black)
-            Text(Format.rate(value, compact: true)).font(Self.rateFont).lineLimit(1)
-        }
-    }
-
-    private func pair(_ label: String, _ value: String, width: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: -2) {
-            Text(label).font(Self.labelFont).tracking(0.5)
-            Text(value).font(Self.valueFont)
-        }
-        .frame(width: width, alignment: .leading)
+    private static func pair(_ label: String, _ value: String, at x: CGFloat) {
+        let lf = font("Montserrat-ExtraBold", 7), vf = font("Montserrat-Bold", 11)
+        let top = (22 - (lineHeight(lf) + lineHeight(vf) - 2)) / 2
+        (label as NSString).draw(at: CGPoint(x: x, y: top), withAttributes: [.font: lf, .kern: 0.5, .foregroundColor: NSColor.black])
+        (value as NSString).draw(at: CGPoint(x: x, y: top + lineHeight(lf) - 2), withAttributes: [.font: vf, .foregroundColor: NSColor.black])
     }
 }
 
@@ -281,13 +298,21 @@ enum MenuBarPreview {
             ("all-wide", MenuMetric.allCases, wide),
         ]
         for (name, metrics, sample) in sets {
-            let view = MenuBarStrip(metrics: metrics, sample: sample).padding(.horizontal, 8).background(Color.white)
-            let r = ImageRenderer(content: view)
-            r.scale = 4
-            if let img = r.nsImage, let tiff = img.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff) {
-                try? rep.representation(using: .png, properties: [:])?.write(to: dir.appendingPathComponent("\(name).png"))
-                print("\(name): \(Int(img.size.width)) × \(Int(img.size.height)) pt")
+            let strip = MenuBarStrip.image(metrics: metrics, sample: sample)
+            let w = Int((strip.size.width + 16) * 4), h = Int(strip.size.height * 4)
+            let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+            ctx.setFillColor(.white); ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
+            ctx.translateBy(x: 32, y: CGFloat(h)); ctx.scaleBy(x: 4, y: -4)
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: true)
+            MenuBarStrip.draw(metrics, sample)
+            NSGraphicsContext.restoreGraphicsState()
+            if let img = ctx.makeImage(), let dest = CGImageDestinationCreateWithURL(dir.appendingPathComponent("\(name).png") as CFURL, "public.png" as CFString, 1, nil) {
+                CGImageDestinationAddImage(dest, img, nil)
+                CGImageDestinationFinalize(dest)
             }
+            print("\(name): \(Int(strip.size.width + 16)) × \(Int(strip.size.height)) pt")
         }
         print("slots: percent \(MenuBarStrip.percentSlot), rate \(MenuBarStrip.rateSlot), disk \(MenuBarStrip.diskSlot), battery \(MenuBarStrip.batterySlot)")
     }

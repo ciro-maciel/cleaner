@@ -11,6 +11,12 @@
         <key>click.ciromaciel.cleaner.helper</key>
         <true/>
     </dict>
+    <!-- Freed memory goes back to macOS at once (macOS 26 and later keep it otherwise). -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>MallocSpaceEfficient</key>
+        <string>1</string>
+    </dict>
     <key>AssociatedBundleIdentifiers</key>
     <array>
         <string>click.ciromaciel.cleaner</string>
