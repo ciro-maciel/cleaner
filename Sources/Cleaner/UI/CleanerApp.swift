@@ -168,11 +168,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Debug.log("didFinishLaunching")
         Debug.startWatchdog()
         MainActor.assumeIsolated {
+            // Opened at login, Cleaner starts in the menu bar only (the Ciro, 03/11/2026), so the
+            // menu bar item turns on if it was off: it is where the app lives.
+            let isLogin = LoginLaunch.isNow()
+            if isLogin && !MainWindow.menuBarOn { UserDefaults.standard.set(true, forKey: MonitorSettings.enabledKey) }
             SystemMonitor.shared.start()
             StatusItem.shared.sync()
             // With the menu bar item on, Cleaner starts there only, no window (the Ciro,
             // 14/10/2026). The panel or opening the app again brings the window.
-            if MainWindow.menuBarOn && !CommandLine.arguments.contains("--screenshots") {
+            if (isLogin || MainWindow.menuBarOn) && !CommandLine.arguments.contains("--screenshots") {
                 NSApp.setActivationPolicy(.accessory)
             } else {
                 MainWindow.show()
