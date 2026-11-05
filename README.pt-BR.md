@@ -135,6 +135,7 @@ Ideias que este projeto tirou de outros limpadores de Mac abertos, com o nosso o
 - [Vervain](https://github.com/yakupbulbul/Vervain): tratar os modelos de IA baixados como uma categoria própria, nunca marcada de saída (`ai-models`).
 - [Kudu](https://github.com/AdventDevInc/kudu): uma página legível com cada regra de limpeza ([docs/pt-BR/RULES.md](docs/pt-BR/RULES.md)).
 - [Sweep](https://github.com/Alyetama/Sweep): ao desinstalar, a pasta do fabricante com a versão no fim ainda é do app (`JetBrains/DataSpell2024.2`), e um nome mais longo é outro app e fica.
+- [BHUninstaller](https://github.com/wpexpertinbd/BHUninstaller): cada resto diz por que é do app (nome igual ao identificador, ao nome do app ou dentro da pasta do fabricante).
 
 ## Licença
 

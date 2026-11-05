@@ -22,6 +22,8 @@ struct Leftover: Identifiable, Hashable {
     let path: String
     let size: Int64
     let kind: String
+    /// Why it belongs to the app: what in its name matched (learned from BHUninstaller).
+    var why: String = ""
     /// Outside the home folder: moving it asks for the administrator password.
     let system: Bool
     /// macOS protects app containers: they only move with Full Disk Access on.
@@ -167,14 +169,24 @@ enum AppCatalog {
         var out: [Leftover] = []
         var seen = Set<String>()
         let fm = FileManager.default
-        func add(_ path: String, _ kind: String) {
+        func add(_ path: String, _ kind: String, _ why: String) {
             guard path != app.path, seen.insert(path).inserted else { return }
-            out.append(Leftover(path: path, size: DiskUsage.size(of: path), kind: kind, system: !path.hasPrefix(home)))
+            out.append(Leftover(path: path, size: DiskUsage.size(of: path), kind: kind, why: why, system: !path.hasPrefix(home)))
         }
+        let byID = L("named after %@", app.bundleID)
+        let byName = L("named after the app")
         for place in places() {
             guard let entries = try? fm.contentsOfDirectory(atPath: place.path) else { continue }
             for entry in entries where hit(entry.lowercased(), place.match) {
-                add((place.path as NSString).appendingPathComponent(entry), place.kind)
+                let e = entry.lowercased(), base = (e as NSString).deletingPathExtension
+                let why: String
+                switch place.match {
+                case .report: why = byName
+                case .name: why = names.contains(e) ? byName : byID
+                case .plugin: why = names.contains(base) ? byName : byID
+                case .plist, .group, .prefix: why = byID
+                }
+                add((place.path as NSString).appendingPathComponent(entry), place.kind, why)
             }
         }
 
@@ -194,7 +206,8 @@ enum AppCatalog {
                     // name does not (Notion never takes NotionCalendar). Learned from Alyetama/Sweep.
                     for child in (try? fm.contentsOfDirectory(atPath: folder)) ?? []
                         where childNames.contains(child.lowercased()) || childNames.contains(versionless(child.lowercased())) {
-                        add((folder as NSString).appendingPathComponent(child), base.hasSuffix("Caches") ? L("Cache") : L("App data"))
+                        add((folder as NSString).appendingPathComponent(child), base.hasSuffix("Caches") ? L("Cache") : L("App data"),
+                            L("inside the %@ folder, named after the app", v))
                     }
                 }
             }

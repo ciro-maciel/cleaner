@@ -386,3 +386,6 @@
 "Clear Leftovers" = "Limpar restos";
 "Dock icon" = "Ícone no Dock";
 "%@ no longer exists" = "%@ não existe mais";
+"named after %@" = "nome igual a %@";
+"named after the app" = "nome igual ao do app";
+"inside the %@ folder, named after the app" = "na pasta %@, com o nome do app";

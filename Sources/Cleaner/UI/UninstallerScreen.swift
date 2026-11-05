@@ -231,7 +231,7 @@ struct UninstallSheet: View {
         }
         ForEach(model.leftovers[app.path] ?? []) { left in
             RowDivider()
-            line(icon: left.system ? "lock" : "folder", title: left.kind, path: left.path, size: left.size,
+            line(icon: left.system ? "lock" : "folder", title: left.why.isEmpty ? left.kind : "\(left.kind) · \(left.why)", path: left.path, size: left.size,
                  locked: false, on: model.leftoverSelection.contains(left.path), appIcon: nil,
                  note: left.protected && !model.hasFullDiskAccess ? L("Needs Full Disk Access") : nil) {
                 if model.leftoverSelection.contains(left.path) { model.leftoverSelection.remove(left.path) }
@@ -310,7 +310,7 @@ struct OrphanSection: View {
                     }
                     ForEach(orphan.leftovers) { left in
                         RowDivider()
-                        row(key: left.path, icon: left.system ? "lock" : "folder", title: left.kind, detail: Format.path(left.path), size: left.size,
+                        row(key: left.path, icon: left.system ? "lock" : "folder", title: left.why.isEmpty ? left.kind : "\(left.kind) · \(left.why)", detail: Format.path(left.path), size: left.size,
                             note: left.protected && !model.hasFullDiskAccess ? L("Needs Full Disk Access") : nil)
                     }
                 }

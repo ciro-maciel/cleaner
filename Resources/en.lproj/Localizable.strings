@@ -386,3 +386,6 @@
 "Clear Leftovers" = "Clear Leftovers";
 "Dock icon" = "Dock icon";
 "%@ no longer exists" = "%@ no longer exists";
+"named after %@" = "named after %@";
+"named after the app" = "named after the app";
+"inside the %@ folder, named after the app" = "inside the %@ folder, named after the app";
