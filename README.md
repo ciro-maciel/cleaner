@@ -89,7 +89,7 @@ Nine rules today. Each one says what it is, why it is safe (in Brazilian Portugu
 }
 ```
 
-The other eight are `logs`, `trash`, `installers`, `xcode-derived-data`, `dev-caches`, `xcode-device-support`, `mail-downloads` and `ai-models` (Hugging Face and LM Studio downloads, off by default). A new rule or a better exclusion is the most useful contribution you can make.
+The other eight are `logs`, `trash`, `installers`, `xcode-derived-data`, `dev-caches`, `xcode-device-support`, `mail-downloads` and `ai-models` (Hugging Face and LM Studio downloads, off by default). Every rule, one per section, with where it looks, what it leaves out and how risky it is: [docs/RULES.md](docs/RULES.md). A new rule or a better exclusion is the most useful contribution you can make.
 
 ## Build it yourself
 
@@ -132,6 +132,7 @@ Ideas this project took from other open-source Mac cleaners, with thanks:
 - [Mac Sai](https://github.com/iliyami/MacSai): letting anyone verify the no-network claim with two commands ("Check it yourself").
 - [Peel](https://github.com/TuguiDragos/Peel): naming the only official sources and showing how to check the signing team.
 - [Vervain](https://github.com/yakupbulbul/Vervain): treating downloaded AI models as their own category, never pre-selected (`ai-models`).
+- [Kudu](https://github.com/AdventDevInc/kudu): a readable page with every cleaning rule ([docs/RULES.md](docs/RULES.md)).
 
 ## License
 

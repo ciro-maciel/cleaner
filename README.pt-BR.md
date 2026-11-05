@@ -48,7 +48,7 @@ nm -u /Applications/Cleaner.app/Contents/MacOS/Cleaner | grep -iE "URLSession|NW
 
 Os limpadores conhecidos pedem que você confie num número de "lixo". O Cleaner mostra de onde vem esse número:
 
-- **As regras são públicas.** O `rules.json` lista cada pasta que o Cleaner olha, por que é seguro limpar e o que fica de fora. Se uma regra estiver errada, você lê e pode mandar a correção.
+- **As regras são públicas.** O `rules.json` lista cada pasta que o Cleaner olha, por que é seguro limpar e o que fica de fora. Uma regra por seção, para ler sem abrir o código: [docs/pt-BR/RULES.md](docs/pt-BR/RULES.md). Se uma regra estiver errada, você lê e pode mandar a correção.
 - **Nada some.** Remover move os itens para um lote da quarentena que guarda o caminho de origem. Devolver é um clique; depois de 7 dias o lote se apaga sozinho.
 - **Remover pede segurar o botão por 3 segundos.** Sem clique por engano.
 - **Ele diz o que não consegue fazer.** Quando o macOS recusa um item, o Cleaner diz por quê:
@@ -133,6 +133,7 @@ Ideias que este projeto tirou de outros limpadores de Mac abertos, com o nosso o
 - [Mac Sai](https://github.com/iliyami/MacSai): deixar qualquer pessoa conferir, em dois comandos, que o app não fala com a rede ("Confira você mesmo").
 - [Peel](https://github.com/TuguiDragos/Peel): dizer quais são as únicas fontes oficiais e mostrar como conferir a equipe que assina.
 - [Vervain](https://github.com/yakupbulbul/Vervain): tratar os modelos de IA baixados como uma categoria própria, nunca marcada de saída (`ai-models`).
+- [Kudu](https://github.com/AdventDevInc/kudu): uma página legível com cada regra de limpeza ([docs/pt-BR/RULES.md](docs/pt-BR/RULES.md)).
 
 ## Licença
 
