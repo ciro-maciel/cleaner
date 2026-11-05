@@ -26,6 +26,24 @@ Prefere a imagem de disco? [Baixe o Cleaner-macos.dmg](https://blob.ciromaciel.c
 
 Para a varredura completa, ligue o Cleaner em **Ajustes do Sistema → Privacidade e Segurança → Acesso Total ao Disco**. Sem isso, o macOS esconde a Lixeira, o Mail e os contêineres dos apps, e o Cleaner avisa em vez de fingir que viu tudo.
 
+## Confira você mesmo
+
+O Cleaner é publicado em dois lugares só: este repositório e [ciromaciel.click/tools/cleaner](https://ciromaciel.click/tools/cleaner?ref=oss-cleaner), de onde vêm os downloads acima. Qualquer outra cópia não é minha.
+
+Toda cópia é assinada pela minha equipe, `4X58N3TK8V`, e notarizada pela Apple:
+
+```bash
+codesign -dv /Applications/Cleaner.app 2>&1 | grep TeamIdentifier   # TeamIdentifier=4X58N3TK8V
+spctl -a -vv /Applications/Cleaner.app                              # source=Notarized Developer ID
+```
+
+E ele não tem código de rede. O app não liga nenhum framework de rede nem chama nenhuma função de rede, então os dois comandos não imprimem nada:
+
+```bash
+otool -L /Applications/Cleaner.app/Contents/MacOS/Cleaner | grep -i network
+nm -u /Applications/Cleaner.app/Contents/MacOS/Cleaner | grep -iE "URLSession|NWConnection|CFSocket"
+```
+
 ## Por que mais um limpador de Mac
 
 Os limpadores conhecidos pedem que você confie num número de "lixo". O Cleaner mostra de onde vem esse número:
@@ -107,6 +125,13 @@ dist/Cleaner.app/Contents/MacOS/Cleaner --screenshots /tmp/shots        # captur
 ## Contribuir
 
 Issues e pull requests são bem-vindos, principalmente no `rules.json`. Veja o [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Aprendemos com
+
+Ideias que este projeto tirou de outros limpadores de Mac abertos, com o nosso obrigado:
+
+- [Mac Sai](https://github.com/iliyami/MacSai): deixar qualquer pessoa conferir, em dois comandos, que o app não fala com a rede ("Confira você mesmo").
+- [Peel](https://github.com/TuguiDragos/Peel): dizer quais são as únicas fontes oficiais e mostrar como conferir a equipe que assina.
 
 ## Licença
 

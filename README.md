@@ -26,6 +26,24 @@ Prefer the disk image? [Download Cleaner-macos.dmg](https://blob.ciromaciel.clic
 
 For a complete scan, turn on Cleaner in **System Settings → Privacy & Security → Full Disk Access**. Without it, macOS hides the Trash, Mail and app containers, and Cleaner tells you so instead of pretending.
 
+## Check it yourself
+
+Cleaner is published in two places only: this repository and [ciromaciel.click/tools/cleaner](https://ciromaciel.click/tools/cleaner?ref=oss-cleaner), whose downloads are the ones above. Any other copy is not mine.
+
+Every copy is signed by my team, `4X58N3TK8V`, and notarized by Apple:
+
+```bash
+codesign -dv /Applications/Cleaner.app 2>&1 | grep TeamIdentifier   # TeamIdentifier=4X58N3TK8V
+spctl -a -vv /Applications/Cleaner.app                              # source=Notarized Developer ID
+```
+
+And it has no network code. The app links no networking framework and calls no networking API, so both commands print nothing:
+
+```bash
+otool -L /Applications/Cleaner.app/Contents/MacOS/Cleaner | grep -i network
+nm -u /Applications/Cleaner.app/Contents/MacOS/Cleaner | grep -iE "URLSession|NWConnection|CFSocket"
+```
+
 ## Why another Mac cleaner
 
 The well-known cleaners ask you to trust a "junk" number. Cleaner shows you how it gets that number:
@@ -106,6 +124,13 @@ dist/Cleaner.app/Contents/MacOS/Cleaner --screenshots /tmp/shots        # captur
 ## Contributing
 
 Issues and pull requests are welcome, especially for `rules.json`. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Learned from
+
+Ideas this project took from other open-source Mac cleaners, with thanks:
+
+- [Mac Sai](https://github.com/iliyami/MacSai): letting anyone verify the no-network claim with two commands ("Check it yourself").
+- [Peel](https://github.com/TuguiDragos/Peel): naming the only official sources and showing how to check the signing team.
 
 ## License
 
