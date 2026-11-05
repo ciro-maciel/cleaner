@@ -62,7 +62,7 @@ Os limpadores conhecidos pedem que você confie num número de "lixo". O Cleaner
 | Tela | O que faz |
 | --- | --- |
 | Visão geral | Uma varredura para tudo: espaço que dá para liberar, disco, apps, inicialização, quarentena |
-| Limpeza | Aplica as regras do `rules.json`: caches, registros, Lixeira, instaladores, Xcode, caches de desenvolvimento, anexos do Mail |
+| Limpeza | Aplica as regras do `rules.json`: caches, registros, Lixeira, instaladores, Xcode, caches de desenvolvimento, anexos do Mail, modelos de IA baixados (desligado por padrão) |
 | Desinstalador | Lista os apps com tamanho e último uso; remove o app e os restos dele em 38 lugares, recibos de .pkg incluídos |
 | Mapa do disco | Mede uma pasta inteira em paralelo e deixa entrar nas maiores |
 | Inicialização | Liga e desliga LaunchAgents e LaunchDaemons sem apagar o arquivo |
@@ -132,6 +132,7 @@ Ideias que este projeto tirou de outros limpadores de Mac abertos, com o nosso o
 
 - [Mac Sai](https://github.com/iliyami/MacSai): deixar qualquer pessoa conferir, em dois comandos, que o app não fala com a rede ("Confira você mesmo").
 - [Peel](https://github.com/TuguiDragos/Peel): dizer quais são as únicas fontes oficiais e mostrar como conferir a equipe que assina.
+- [Vervain](https://github.com/yakupbulbul/Vervain): tratar os modelos de IA baixados como uma categoria própria, nunca marcada de saída (`ai-models`).
 
 ## Licença
 

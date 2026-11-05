@@ -60,7 +60,7 @@ The well-known cleaners ask you to trust a "junk" number. Cleaner shows you how 
 | Screen | What it does |
 | --- | --- |
 | Overview | One scan for everything: space you can free, disk, apps, startup items, quarantine |
-| Cleanup | Applies the rules in `rules.json`: app caches, logs, Trash, old installers, Xcode, developer caches, Mail downloads |
+| Cleanup | Applies the rules in `rules.json`: app caches, logs, Trash, old installers, Xcode, developer caches, Mail downloads, downloaded AI models (off by default) |
 | Uninstaller | Lists apps with size and last use, then removes the app and its leftovers in 38 places, .pkg receipts included |
 | Disk map | Measures a whole folder in parallel and lets you walk into the biggest parts |
 | Startup | Turns LaunchAgents and LaunchDaemons on and off without deleting the file |
@@ -71,7 +71,7 @@ The well-known cleaners ask you to trust a "junk" number. Cleaner shows you how 
 
 ## The rules
 
-Eight rules today. Each one says what it is, why it is safe (in Brazilian Portuguese and in English), how risky it is and whether it is on by default:
+Nine rules today. Each one says what it is, why it is safe (in Brazilian Portuguese and in English), how risky it is and whether it is on by default:
 
 ```json
 {
@@ -89,7 +89,7 @@ Eight rules today. Each one says what it is, why it is safe (in Brazilian Portug
 }
 ```
 
-The other seven are `logs`, `trash`, `installers`, `xcode-derived-data`, `dev-caches`, `xcode-device-support` and `mail-downloads`. A new rule or a better exclusion is the most useful contribution you can make.
+The other eight are `logs`, `trash`, `installers`, `xcode-derived-data`, `dev-caches`, `xcode-device-support`, `mail-downloads` and `ai-models` (Hugging Face and LM Studio downloads, off by default). A new rule or a better exclusion is the most useful contribution you can make.
 
 ## Build it yourself
 
@@ -131,6 +131,7 @@ Ideas this project took from other open-source Mac cleaners, with thanks:
 
 - [Mac Sai](https://github.com/iliyami/MacSai): letting anyone verify the no-network claim with two commands ("Check it yourself").
 - [Peel](https://github.com/TuguiDragos/Peel): naming the only official sources and showing how to check the signing team.
+- [Vervain](https://github.com/yakupbulbul/Vervain): treating downloaded AI models as their own category, never pre-selected (`ai-models`).
 
 ## License
 

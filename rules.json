@@ -98,6 +98,18 @@
       "paths": ["~/Library/Containers/com.apple.mail/Data/Library/Mail Downloads"],
       "exclude": [".*"],
       "defaultOn": true
+    },
+    {
+      "id": "ai-models",
+      "title": "Modelos de IA baixados",
+      "why": "Modelos que ferramentas como Hugging Face e LM Studio baixam e baixam de novo quando você usa. Costumam ocupar gigabytes; confira cada um, porque o app que usa o modelo precisa dele para funcionar.",
+      "titleEn": "Downloaded AI models",
+      "whyEn": "Models that tools like Hugging Face and LM Studio download, and download again when you use them. They often take gigabytes; check each one, because the app that uses a model needs it to work.",
+      "risk": "medium",
+      "mode": "children",
+      "paths": ["~/.cache/huggingface/hub", "~/.lmstudio/models", "~/.cache/lm-studio/models"],
+      "exclude": [".*", "CACHEDIR.TAG", "version*.txt"],
+      "defaultOn": false
     }
   ]
 }
