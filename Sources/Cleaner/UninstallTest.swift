@@ -47,8 +47,11 @@ enum UninstallTest {
             "\(lib)/Saved Application State/\(id).savedState/window.data",
             "\(lib)/HTTPStorages/\(id)/httpstorages.sqlite",
             "\(lib)/Logs/DiagnosticReports/\(name)-2026-10-10-000000.ips",
+            "\(lib)/Application Support/ciromaciel/cleaner-teste-full2026.2/data.bin",   // vendor folder with a version
         ]
         files.forEach { write($0) }
+        let other = "\(lib)/Application Support/ciromaciel/cleaner-teste-fullcalendar"
+        write(other + "/data.bin")
         Privileged.run("/usr/bin/defaults", ["write", id, "chave", "valor"])   // cached by cfprefsd
         let agent = "\(lib)/LaunchAgents/\(label).plist"
         (["Label": label, "ProgramArguments": ["/bin/sleep", "600"], "RunAtLoad": true] as NSDictionary).write(toFile: agent, atomically: true)
@@ -85,6 +88,8 @@ enum UninstallTest {
         let found = Set(leftovers.map(\.path))
         let missing = expected.filter { !found.contains($0) }
         check(missing.isEmpty, "every trace found (\(expected.count))" + (missing.isEmpty ? "" : ", missing: \(missing.map(Format.path))"))
+        // A longer name in the same vendor folder is another app and must stay.
+        check(!found.contains(other), "another app in the vendor folder left alone (\(Format.path(other)))")
 
         // Uninstall with the app's routine.
         let q = Quarantine(root: fm.temporaryDirectory.appendingPathComponent("cleaner-uninstall-test-\(UUID().uuidString.prefix(6))"))

@@ -133,6 +133,7 @@ Ideas this project took from other open-source Mac cleaners, with thanks:
 - [Peel](https://github.com/TuguiDragos/Peel): naming the only official sources and showing how to check the signing team.
 - [Vervain](https://github.com/yakupbulbul/Vervain): treating downloaded AI models as their own category, never pre-selected (`ai-models`).
 - [Kudu](https://github.com/AdventDevInc/kudu): a readable page with every cleaning rule ([docs/RULES.md](docs/RULES.md)).
+- [Sweep](https://github.com/Alyetama/Sweep): on uninstall, a vendor folder with a version at the end still names the app (`JetBrains/DataSpell2024.2`), while a longer name is another app and stays.
 
 ## License
 

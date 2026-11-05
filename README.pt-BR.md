@@ -134,6 +134,7 @@ Ideias que este projeto tirou de outros limpadores de Mac abertos, com o nosso o
 - [Peel](https://github.com/TuguiDragos/Peel): dizer quais são as únicas fontes oficiais e mostrar como conferir a equipe que assina.
 - [Vervain](https://github.com/yakupbulbul/Vervain): tratar os modelos de IA baixados como uma categoria própria, nunca marcada de saída (`ai-models`).
 - [Kudu](https://github.com/AdventDevInc/kudu): uma página legível com cada regra de limpeza ([docs/pt-BR/RULES.md](docs/pt-BR/RULES.md)).
+- [Sweep](https://github.com/Alyetama/Sweep): ao desinstalar, a pasta do fabricante com a versão no fim ainda é do app (`JetBrains/DataSpell2024.2`), e um nome mais longo é outro app e fica.
 
 ## Licença
 

@@ -190,12 +190,23 @@ enum AppCatalog {
                 guard let vendors = try? fm.contentsOfDirectory(atPath: base) else { continue }
                 for v in vendors where v.lowercased() == vendor {
                     let folder = (base as NSString).appendingPathComponent(v)
-                    for child in (try? fm.contentsOfDirectory(atPath: folder)) ?? [] where childNames.contains(child.lowercased()) {
+                    // A version at the end still names the app (JetBrains/DataSpell2024.2); a longer
+                    // name does not (Notion never takes NotionCalendar). Learned from Alyetama/Sweep.
+                    for child in (try? fm.contentsOfDirectory(atPath: folder)) ?? []
+                        where childNames.contains(child.lowercased()) || childNames.contains(versionless(child.lowercased())) {
                         add((folder as NSString).appendingPathComponent(child), base.hasSuffix("Caches") ? L("Cache") : L("App data"))
                     }
                 }
             }
         }
         return out.sorted { $0.size > $1.size }
+    }
+
+    /// The name without a version at its end: "dataspell2024.2" → "dataspell", "app 3" → "app".
+    /// Unchanged when nothing but a version would be left.
+    static func versionless(_ name: String) -> String {
+        guard let range = name.range(of: #"[\s._-]*\d+(\.\d+)*$"#, options: .regularExpression) else { return name }
+        let base = String(name[..<range.lowerBound])
+        return base.count >= 3 ? base : name
     }
 }
